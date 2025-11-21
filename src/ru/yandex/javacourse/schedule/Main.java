@@ -40,6 +40,7 @@ public class Main {
 		task.setStatus(DONE);
 		manager.updateTask(task);
 		System.out.println("CHANGE STATUS: Task2 IN_PROGRESS->DONE");
+		System.out.println();
 		System.out.println("Задачи:");
 		for (Task t : manager.getTasks()) {
 			System.out.println(t);
@@ -58,6 +59,7 @@ public class Main {
 			System.out.println(t);
 		}
 
+		System.out.println();
 		System.out.println("Эпики:");
 		for (Task e : manager.getEpics()) {
 			System.out.println(e);
@@ -71,6 +73,7 @@ public class Main {
 		System.out.println("CHANGE STATUS: Epic1 IN_PROGRESS->NEW");
 		printAllTasks(manager);
 
+		System.out.println();
 		System.out.println("Эпики:");
 		for (Task e : manager.getEpics()) {
 			System.out.println(e);
