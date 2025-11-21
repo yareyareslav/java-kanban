@@ -30,10 +30,10 @@ public class InMemoryHistoryManagerTest {
     public void testHistoricVersionsByPointer(){
         Task task = new Task("Test 1", "Testiong task 1", TaskStatus.NEW);
         historyManager.add(task);
-        assertEquals(task.getStatus(), historyManager.getTasks().get(0).getStatus(), "historic task should be stored");
+        assertEquals(task.getStatus(), historyManager.getTasks().getFirst().getStatus(), "historic task should be stored");
         task.setStatus(TaskStatus.IN_PROGRESS);
         historyManager.add(task);
-        assertEquals(TaskStatus.NEW, historyManager.getTasks().get(0).getStatus(), "historic task should not be changed");
+        assertEquals(TaskStatus.NEW, historyManager.getTasks().getFirst().getStatus(), "historic task should not be changed");
     }
 
 }

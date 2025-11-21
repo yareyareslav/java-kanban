@@ -16,10 +16,13 @@ public class InMemoryHistoryManager implements HistoryManager {
 	final private Map<Integer, Node<Integer, Task>> history = new HashMap<>();
 
 	private void removeNode(Node<Integer, Task> node) {
+		if (node == null) return;
 		if (history.containsKey(node.getKey())) {
 			Node<Integer, Task> prev = node.getPrev();
 			Node<Integer, Task> next = node.getNext();
-			prev.setNext(next);
+			if (prev != null) {
+				prev.setNext(next);
+			}
 
 			history.remove(node.getKey(), node);
 		}
