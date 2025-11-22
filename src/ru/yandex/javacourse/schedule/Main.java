@@ -1,10 +1,8 @@
 package ru.yandex.javacourse.schedule;
 
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.DONE;
-import static ru.yandex.javacourse.schedule.tasks.TaskStatus.IN_PROGRESS;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
 
-import ru.yandex.javacourse.schedule.manager.HistoryManager;
 import ru.yandex.javacourse.schedule.manager.Managers;
 import ru.yandex.javacourse.schedule.manager.TaskManager;
 import ru.yandex.javacourse.schedule.tasks.Epic;
