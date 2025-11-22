@@ -15,34 +15,34 @@ public class InMemoryHistoryManager implements HistoryManager {
 	private Node<Integer, Task> tail;
 	final private Map<Integer, Node<Integer, Task>> history = new HashMap<>();
 
-	private void removeNode(Node<Integer, Task> node) {
+	@Override
+	public void remove(int id) {
+		Node<Integer, Task> node = history.get(id);
 		if (node == null) return;
-		if (history.containsKey(node.getKey())) {
+		if (history.containsKey(id)) {
 			Node<Integer, Task> prev = node.getPrev();
 			Node<Integer, Task> next = node.getNext();
 			if (prev != null) {
 				prev.setNext(next);
+			} else {
+				head = next;
+			}
+			if (next != null) {
+				next.setPrev(prev);
+			} else {
+				tail = prev;
 			}
 
-			history.remove(node.getKey(), node);
+			history.remove(id, node);
 		}
-	}
-
-	@Override
-	public void remove(int id) {
-		Node<Integer, Task> node = history.get(id);
-		removeNode(node);
 	}
 
 	@Override
 	public void add(Task task) {
-		Integer taskId = task.getId();
-		Node<Integer, Task> node = new Node<>(task.getId(), task);
-		if (history.containsKey(taskId)) {
-			removeNode(node);
-		}
+		int taskId = task.getId();
+		Node<Integer, Task> newEntry = new Node<>(taskId, task);
+		remove(taskId);
 
-		Node<Integer, Task> newEntry = new Node<>(task.getId(), task);
 		history.put(taskId, newEntry);
 
 		if (tail == null) {
