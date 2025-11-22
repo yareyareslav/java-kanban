@@ -21,6 +21,13 @@ public class InMemoryTaskManager implements TaskManager {
 	private int generatorId = 0;
 	private final HistoryManager historyManager = Managers.getDefaultHistory();
 
+	private int generateId() {
+		while (tasks.containsKey(generatorId) || subtasks.containsKey(generatorId) || epics.containsKey(generatorId)) {
+			++generatorId;
+		}
+		return generatorId;
+	}
+
 
 	@Override
 	public ArrayList<Task> getTasks() {
@@ -73,25 +80,22 @@ public class InMemoryTaskManager implements TaskManager {
 
 	@Override
 	public int addNewTask(Task task) {
-		Integer id = task.getId();
-		if (id != null) {
-			tasks.put(id, task);
-			return task.getId();
+		int id = task.getId();
+		if (id == 0) {
+			id = generateId();
+			task.setId(id);
 		}
-
-		while (tasks.containsKey(generatorId)) {
-			generatorId++;
-		}
-
-		task.setId(generatorId);
 		tasks.put(id, task);
 		return id;
 	}
 
 	@Override
 	public int addNewEpic(Epic epic) {
-		final int id = ++generatorId;
-		epic.setId(id);
+		int id = epic.getId();
+		if (id == 0) {
+			id = generateId();
+			epic.setId(id);
+		}
 		epics.put(id, epic);
 		return id;
 
@@ -104,7 +108,11 @@ public class InMemoryTaskManager implements TaskManager {
 		if (epic == null) {
 			return null;
 		}
-		final int id = ++generatorId;
+		int id = subtask.getId();
+		if (id == 0) {
+			id = generateId();
+			subtask.setId(id);
+		}
 		subtask.setId(id);
 		subtasks.put(id, subtask);
 		epic.addSubtaskId(subtask.getId());
@@ -148,13 +156,16 @@ public class InMemoryTaskManager implements TaskManager {
 	@Override
 	public void deleteTask(int id) {
 		tasks.remove(id);
+		historyManager.remove(id);
 	}
 
 	@Override
 	public void deleteEpic(int id) {
 		final Epic epic = epics.remove(id);
+		historyManager.remove(id);
 		for (Integer subtaskId : epic.getSubtaskIds()) {
 			subtasks.remove(subtaskId);
+			historyManager.remove(subtaskId);
 		}
 	}
 
@@ -164,6 +175,7 @@ public class InMemoryTaskManager implements TaskManager {
 		if (subtask == null) {
 			return;
 		}
+		historyManager.remove(id);
 		Epic epic = epics.get(subtask.getEpicId());
 		epic.removeSubtask(id);
 		updateEpicStatus(epic.getId());
