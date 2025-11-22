@@ -13,7 +13,7 @@ import ru.yandex.javacourse.schedule.tasks.Task;
 public class InMemoryHistoryManager implements HistoryManager {
 	private Node<Integer, Task> head;
 	private Node<Integer, Task> tail;
-	final private Map<Integer, Node<Integer, Task>> history = new HashMap<>();
+	private final Map<Integer, Node<Integer, Task>> history = new HashMap<>();
 
 	@Override
 	public void remove(int id) {
