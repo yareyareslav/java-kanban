@@ -13,5 +13,6 @@ public interface HistoryManager {
 	ArrayList<Task> getTasks();
 
 	void add(Task task);
+
 	void remove(int id);
 }
