@@ -45,7 +45,8 @@ public class InMemoryHistoryManager implements HistoryManager {
 		history.put(taskId, newEntry);
 
 		if (tail == null) {
-			head = tail = newEntry;
+			head = newEntry;
+			tail = newEntry;
 		} else {
 			tail.setNext(newEntry);
 			newEntry.setPrev(tail);
