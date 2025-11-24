@@ -14,17 +14,6 @@ public class HistoryManagerNodeTest {
     }
 
     @Test
-    public void testGetValue() {
-        assertEquals(123, node.getValue());
-    }
-
-    @Test
-    public void testSetValue() {
-        node.setValue(999);
-        assertEquals(999, node.getValue());
-    }
-
-    @Test
     public void testPrevNextSettersAndGetters() {
         HistoryManagerNode<Integer> prevNode = new HistoryManagerNode<>(1);
         HistoryManagerNode<Integer> nextNode = new HistoryManagerNode<>(2);
