@@ -1,5 +1,7 @@
 package ru.yandex.javacourse.schedule.tasks;
 
+import ru.yandex.javacourse.schedule.exceptions.InvalidEpicIdException;
+
 public class Subtask extends Task {
 	protected int epicId;
 

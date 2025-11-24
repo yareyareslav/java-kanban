@@ -1,6 +1,7 @@
 package ru.yandex.javacourse.schedule.tasks;
 
 import org.junit.jupiter.api.Test;
+import ru.yandex.javacourse.schedule.exceptions.InvalidEpicIdException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
