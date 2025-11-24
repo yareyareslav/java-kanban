@@ -37,7 +37,7 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void remove_nodeShouldBeDeletedByItsI() {
+    public void remove_nodeShouldBeDeletedByItsID() {
         Task task1 = new Task(1, "Test 1", "Testiong task 1", TaskStatus.NEW);
         Task task2 = new Task(2, "Test 2", "Testiong task 2", TaskStatus.NEW);
         Task task3 = new Task(3, "Test 3", "Testiong task 3", TaskStatus.NEW);
@@ -48,7 +48,7 @@ public class InMemoryHistoryManagerTest {
         assertEquals(Arrays.asList(task3, task1, task2), tasks1, "history manager should remember the order of tasks");
         historyManager.remove(1);
         ArrayList<Task> tasks2 = historyManager.getTasks();
-        assertEquals(Arrays.asList(task3, task2), tasks2, "history manager should delete the task1 in the middle of the list");
+        assertEquals(Arrays.asList(task3, task2), tasks2, "history manager should not contain task1 in the list");
     }
 
     @Test
