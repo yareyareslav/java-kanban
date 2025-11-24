@@ -1,16 +1,16 @@
-package ru.yandex.javacourse.schedule.custom;
+package ru.yandex.javacourse.schedule.manager;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class NodeTest {
+public class HistoryManagerNodeTest {
 
-    private Node<String, Integer> node;
+    private HistoryManagerNode<String, Integer> node;
 
     @BeforeEach
     public void setUp() {
-        node = new Node<>("key", 123);
+        node = new HistoryManagerNode<>("key", 123);
     }
 
     @Test
@@ -37,9 +37,9 @@ public class NodeTest {
 
     @Test
     public void testPrevNextSettersAndGetters() {
-        Node<String, Integer> prevNode = new Node<>("prevKey", 1);
-        Node<String, Integer> nextNode = new Node<>("nextKey", 2);
-        Node<String, Integer> nextNextNode = new Node<>("nextNextKey", 3);
+        HistoryManagerNode<String, Integer> prevNode = new HistoryManagerNode<>("prevKey", 1);
+        HistoryManagerNode<String, Integer> nextNode = new HistoryManagerNode<>("nextKey", 2);
+        HistoryManagerNode<String, Integer> nextNextNode = new HistoryManagerNode<>("nextNextKey", 3);
         node.setPrev(prevNode);
         node.setNext(nextNode);
         node.getNext().setNext(nextNextNode);

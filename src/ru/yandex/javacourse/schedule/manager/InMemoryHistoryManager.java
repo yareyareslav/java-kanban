@@ -2,7 +2,6 @@ package ru.yandex.javacourse.schedule.manager;
 
 import java.util.*;
 
-import ru.yandex.javacourse.schedule.custom.Node;
 import ru.yandex.javacourse.schedule.tasks.Task;
 
 /**
@@ -11,17 +10,17 @@ import ru.yandex.javacourse.schedule.tasks.Task;
  * @author Vladimir Ivanov (ivanov.vladimir.l@gmail.com)
  */
 public class InMemoryHistoryManager implements HistoryManager {
-	private Node<Integer, Task> head;
-	private Node<Integer, Task> tail;
-	private final Map<Integer, Node<Integer, Task>> history = new HashMap<>();
+	private HistoryManagerNode<Integer, Task> head;
+	private HistoryManagerNode<Integer, Task> tail;
+	private final Map<Integer, HistoryManagerNode<Integer, Task>> history = new HashMap<>();
 
 	@Override
 	public void remove(int id) {
-		Node<Integer, Task> node = history.get(id);
+		HistoryManagerNode<Integer, Task> node = history.get(id);
 		if (node == null) return;
 		if (history.containsKey(id)) {
-			Node<Integer, Task> prev = node.getPrev();
-			Node<Integer, Task> next = node.getNext();
+			HistoryManagerNode<Integer, Task> prev = node.getPrev();
+			HistoryManagerNode<Integer, Task> next = node.getNext();
 			if (prev != null) {
 				prev.setNext(next);
 			} else {
@@ -40,7 +39,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 	@Override
 	public void add(Task task) {
 		int taskId = task.getId();
-		Node<Integer, Task> newEntry = new Node<>(taskId, task);
+		HistoryManagerNode<Integer, Task> newEntry = new HistoryManagerNode<>(taskId, task);
 		remove(taskId);
 
 		history.put(taskId, newEntry);
@@ -58,7 +57,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 	public ArrayList<Task> getTasks() {
 		ArrayList<Task> result = new ArrayList<>();
 		if (head == null) return result;
-		Node<Integer, Task> currentNode = head;
+		HistoryManagerNode<Integer, Task> currentNode = head;
 		while (currentNode != null) {
 			result.add(currentNode.getValue());
 			currentNode = currentNode.getNext();

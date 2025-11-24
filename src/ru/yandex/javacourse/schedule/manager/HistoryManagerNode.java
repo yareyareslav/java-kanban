@@ -1,13 +1,13 @@
-package ru.yandex.javacourse.schedule.custom;
+package ru.yandex.javacourse.schedule.manager;
 
-public class Node<K, V> {
+public class HistoryManagerNode<K, V> {
     K key;
     V value;
 
-    Node<K, V> prev;
-    Node<K, V> next;
+    HistoryManagerNode<K, V> prev;
+    HistoryManagerNode<K, V> next;
 
-    public Node(K key, V value) {
+    public HistoryManagerNode(K key, V value) {
         this.key = key;
         this.value = value;
     }
@@ -28,19 +28,19 @@ public class Node<K, V> {
         this.value = value;
     }
 
-    public Node<K, V> getPrev() {
+    public HistoryManagerNode<K, V> getPrev() {
         return prev;
     }
 
-    public Node<K, V> getNext() {
+    public HistoryManagerNode<K, V> getNext() {
         return next;
     }
 
-    public void setPrev(Node<K, V> prev) {
+    public void setPrev(HistoryManagerNode<K, V> prev) {
         this.prev = prev;
     }
 
-    public void setNext(Node<K, V> next) {
+    public void setNext(HistoryManagerNode<K, V> next) {
         this.next = next;
     }
 }
