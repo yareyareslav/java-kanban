@@ -10,17 +10,17 @@ import ru.yandex.javacourse.schedule.tasks.Task;
  * @author Vladimir Ivanov (ivanov.vladimir.l@gmail.com)
  */
 public class InMemoryHistoryManager implements HistoryManager {
-	private HistoryManagerNode<Integer, Task> head;
-	private HistoryManagerNode<Integer, Task> tail;
-	private final Map<Integer, HistoryManagerNode<Integer, Task>> history = new HashMap<>();
+	private HistoryManagerNode<Task> head;
+	private HistoryManagerNode<Task> tail;
+	private final Map<Integer, HistoryManagerNode<Task>> history = new HashMap<>();
 
 	@Override
 	public void remove(int id) {
-		HistoryManagerNode<Integer, Task> node = history.get(id);
+		HistoryManagerNode<Task> node = history.get(id);
 		if (node == null) return;
 		if (history.containsKey(id)) {
-			HistoryManagerNode<Integer, Task> prev = node.getPrev();
-			HistoryManagerNode<Integer, Task> next = node.getNext();
+			HistoryManagerNode<Task> prev = node.getPrev();
+			HistoryManagerNode<Task> next = node.getNext();
 			if (prev != null) {
 				prev.setNext(next);
 			} else {
@@ -39,7 +39,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 	@Override
 	public void add(Task task) {
 		int taskId = task.getId();
-		HistoryManagerNode<Integer, Task> newEntry = new HistoryManagerNode<>(taskId, task);
+		HistoryManagerNode<Task> newEntry = new HistoryManagerNode<>(task);
 		remove(taskId);
 
 		history.put(taskId, newEntry);
@@ -57,7 +57,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 	public ArrayList<Task> getTasks() {
 		ArrayList<Task> result = new ArrayList<>();
 		if (head == null) return result;
-		HistoryManagerNode<Integer, Task> currentNode = head;
+		HistoryManagerNode<Task> currentNode = head;
 		while (currentNode != null) {
 			result.add(currentNode.getValue());
 			currentNode = currentNode.getNext();

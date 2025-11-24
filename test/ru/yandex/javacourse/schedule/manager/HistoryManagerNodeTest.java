@@ -6,27 +6,16 @@ import org.junit.jupiter.api.Test;
 
 public class HistoryManagerNodeTest {
 
-    private HistoryManagerNode<String, Integer> node;
+    private HistoryManagerNode<Integer> node;
 
     @BeforeEach
     public void setUp() {
-        node = new HistoryManagerNode<>("key", 123);
-    }
-
-    @Test
-    public void testGetKey() {
-        assertEquals("key", node.getKey());
+        node = new HistoryManagerNode<>( 123);
     }
 
     @Test
     public void testGetValue() {
         assertEquals(123, node.getValue());
-    }
-
-    @Test
-    public void testSetKey() {
-        node.setKey("newKey");
-        assertEquals("newKey", node.getKey());
     }
 
     @Test
@@ -37,9 +26,9 @@ public class HistoryManagerNodeTest {
 
     @Test
     public void testPrevNextSettersAndGetters() {
-        HistoryManagerNode<String, Integer> prevNode = new HistoryManagerNode<>("prevKey", 1);
-        HistoryManagerNode<String, Integer> nextNode = new HistoryManagerNode<>("nextKey", 2);
-        HistoryManagerNode<String, Integer> nextNextNode = new HistoryManagerNode<>("nextNextKey", 3);
+        HistoryManagerNode<Integer> prevNode = new HistoryManagerNode<>(1);
+        HistoryManagerNode<Integer> nextNode = new HistoryManagerNode<>(2);
+        HistoryManagerNode<Integer> nextNextNode = new HistoryManagerNode<>(3);
         node.setPrev(prevNode);
         node.setNext(nextNode);
         node.getNext().setNext(nextNextNode);
