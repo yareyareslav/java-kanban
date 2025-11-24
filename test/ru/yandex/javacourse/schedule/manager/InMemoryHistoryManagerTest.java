@@ -37,7 +37,7 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void testRemoveNodeById() {
+    public void remove_nodeShouldBeDeletedByItsI() {
         Task task1 = new Task(1, "Test 1", "Testiong task 1", TaskStatus.NEW);
         Task task2 = new Task(2, "Test 2", "Testiong task 2", TaskStatus.NEW);
         Task task3 = new Task(3, "Test 3", "Testiong task 3", TaskStatus.NEW);
@@ -52,7 +52,7 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void testGetTasksOrder() {
+    public void getTasks_shouldSaveOrder_ifAddTaskWithTheSameId() {
         Task task1 = new Task(1, "Test 1", "Testiong task 1", TaskStatus.NEW);
         Task task2 = new Task(2, "Test 2", "Testiong task 2", TaskStatus.NEW);
         Task task3 = new Task(3, "Test 3", "Testiong task 3", TaskStatus.NEW);

@@ -14,11 +14,6 @@ public class HistoryManagerNode<V> {
         return value;
     }
 
-
-    public void setValue(V value) {
-        this.value = value;
-    }
-
     public HistoryManagerNode<V> getPrev() {
         return prev;
     }
