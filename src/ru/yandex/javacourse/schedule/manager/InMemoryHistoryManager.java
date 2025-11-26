@@ -9,19 +9,20 @@ import ru.yandex.javacourse.schedule.tasks.Task;
  *
  * @author Vladimir Ivanov (ivanov.vladimir.l@gmail.com)
  */
+
 public class InMemoryHistoryManager implements HistoryManager {
-	private HistoryManagerNode<Task> head;
-	private HistoryManagerNode<Task> tail;
-	private final Map<Integer, HistoryManagerNode<Task>> history = new HashMap<>();
+	private Node<Task> head;
+	private Node<Task> tail;
+	private final Map<Integer, Node<Task>> history = new HashMap<>();
 
 	@Override
 	public void remove(int id) {
 		if (!history.containsKey(id)) {
 			return;
 		}
-		HistoryManagerNode<Task> node = history.get(id);
-		HistoryManagerNode<Task> prev = node.getPrev();
-		HistoryManagerNode<Task> next = node.getNext();
+		Node<Task> node = history.get(id);
+		Node<Task> prev = node.getPrev();
+		Node<Task> next = node.getNext();
 		if (prev != null) {
 			prev.setNext(next);
 		} else {
@@ -39,7 +40,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 	@Override
 	public void add(Task task) {
 		int taskId = task.getId();
-		HistoryManagerNode<Task> newEntry = new HistoryManagerNode<>(task);
+		Node<Task> newEntry = new Node<>(task);
 		remove(taskId);
 
 		history.put(taskId, newEntry);
@@ -58,7 +59,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 	public ArrayList<Task> getTasks() {
 		ArrayList<Task> result = new ArrayList<>();
 		if (head == null) return result;
-		HistoryManagerNode<Task> currentNode = head;
+		Node<Task> currentNode = head;
 		while (currentNode != null) {
 			result.add(currentNode.getValue());
 			currentNode = currentNode.getNext();
