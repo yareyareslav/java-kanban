@@ -5,16 +5,13 @@ import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.Task;
 import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.nio.file.Path;
+import java.io.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
-    Path filePath;
-    public FileBackedTaskManager(Path filePath) {
+    File file;
+    public FileBackedTaskManager(File file) {
         super();
-        this.filePath = filePath;
+        this.file = file;
     }
 
     private String formatFileLine(Task task) {
@@ -38,18 +35,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     private void save() throws RuntimeException {
-        try (Writer fileWriter = new FileWriter(filePath.toFile())) {
-            for (Task task : this.getTasks()) {
+        try (Writer fileWriter = new FileWriter(file)) {
+            if (file.length() == 0) {
+                fileWriter.write("id,type,name,status,description,epic\r\n");
+            }
+            for (Task task : super.getTasks()) {
                 String line = formatFileLine(task);
                 fileWriter.write(line);
             }
 
-            for (Epic epic : this.getEpics()) {
+            for (Epic epic : super.getEpics()) {
                 String line = formatFileLine(epic);
                 fileWriter.write(line);
             }
 
-            for (Subtask subtask : this.getSubtasks()) {
+            for (Subtask subtask : super.getSubtasks()) {
                 String line = formatFileLine(subtask);
                 fileWriter.write(line);
             }
@@ -57,6 +57,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+    }
+
+    @Override
+    public void loadFromFile(File file) {
+        super.loadFromFile(file);
+        save();
     }
 
     @Override
@@ -80,4 +86,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return id;
     }
 
+    @Override
+    public void updateTask(Task task) {
+        super.updateTask(task);
+        save();
+    }
+
+    @Override
+    public void updateSubtask(Subtask subtask) {
+        super.updateSubtask(subtask);
+        save();
+    }
+
+    @Override
+    public void updateEpic(Epic epic) {
+        super.updateEpic(epic);
+        save();
+    }
 }

@@ -3,6 +3,7 @@ package ru.yandex.javacourse.schedule.manager;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.IN_PROGRESS;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +27,43 @@ public class InMemoryTaskManager implements TaskManager {
 			++generatorId;
 		}
 		return generatorId;
+	}
+
+	public void loadFromFile(File file) {
+		try (Reader fr = new FileReader(file); BufferedReader br = new BufferedReader(fr)) {
+			while (br.ready()) {
+				String line = br.readLine();
+
+				if (line.contains("id,type,name,status,description,epic")) {
+					continue;
+				}
+
+				String[] lineSplit = line.split(",");
+				int id = Integer.parseInt(lineSplit[0]);
+				String type = lineSplit[1];
+				String name = lineSplit[2];
+				TaskStatus status = TaskStatus.valueOf(lineSplit[3]);
+				String description = lineSplit[4];
+
+				switch (type) {
+					case "TASK":
+						Task task = new Task(id, name, description, status);
+						this.addNewTask(task);
+						break;
+					case "SUBTASK":
+						int epicId = Integer.parseInt(lineSplit[5]);
+						Subtask subtask = new Subtask(id, name, description, status, epicId);
+						this.addNewSubtask(subtask);
+						break;
+					case "EPIC":
+						Epic epic = new Epic(id, name, description);
+						this.addNewEpic(epic);
+						break;
+				}
+			}
+		} catch (IOException exception) {
+			throw new RuntimeException(exception);
+		}
 	}
 
 
