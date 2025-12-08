@@ -1,10 +1,13 @@
 package ru.yandex.javacourse.schedule.tasks;
 
+import ru.yandex.javacourse.schedule.exceptions.InvalidEpicIdException;
+
 public class Subtask extends Task {
 	protected int epicId;
 
 	public Subtask(int id, String name, String description, TaskStatus status, int epicId) {
 		super(id, name, description, status);
+		if (epicId == id) throw new InvalidEpicIdException("EpicID should not be equal to subtaskID");
 		this.epicId = epicId;
 	}
 
