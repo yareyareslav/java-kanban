@@ -1,0 +1,7 @@
+1,TASK,Task #1,NEW,Task1 description,
+2,TASK,Task #2,NEW,Task2 description,
+5,SUBTASK,Subtask #1-1,NEW,Subtask1 description,3
+6,SUBTASK,Subtask #2-1,NEW,Subtask1 description,3
+7,SUBTASK,Subtask #3-1,DONE,Subtask1 description,3
+3,EPIC,Epic #1,IN_PROGRESS,Epic1 with 3 subtasks,
+4,EPIC,Epic #2,NEW,Epic2 without any subtasks,
