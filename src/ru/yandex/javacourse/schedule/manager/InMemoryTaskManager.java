@@ -29,67 +29,6 @@ public class InMemoryTaskManager implements TaskManager {
 		return generatorId;
 	}
 
-	public void loadFromFile(File file) {
-		try (Reader fr = new FileReader(file); BufferedReader br = new BufferedReader(fr)) {
-			while (br.ready()) {
-				String line = br.readLine();
-
-				if (line.contains("id,type,name,status,description,epic")) {
-					continue;
-				}
-
-				String[] lineSplit = line.split(",");
-
-				if (lineSplit.length < 5) {
-					break;
-				}
-
-				int id = Integer.parseInt(lineSplit[0]);
-				String type = lineSplit[1];
-				String name = lineSplit[2];
-				TaskStatus status = TaskStatus.valueOf(lineSplit[3]);
-				String description = lineSplit[4];
-
-				switch (type) {
-					case "TASK":
-						Task task = new Task(id, name, description, status);
-						this.addNewTask(task);
-						break;
-					case "SUBTASK":
-						int epicId = Integer.parseInt(lineSplit[5]);
-						Subtask subtask = new Subtask(id, name, description, status, epicId);
-						this.addNewSubtask(subtask);
-						break;
-					case "EPIC":
-						Epic epic = new Epic(id, name, description);
-						this.addNewEpic(epic);
-						break;
-				}
-			}
-		} catch (IOException exception) {
-			throw new RuntimeException(exception);
-		}
-	}
-
-	public void printAllTasks() {
-		System.out.println("Задачи:");
-		for (Task task : getTasks()) {
-			System.out.println(task);
-		}
-		System.out.println("Эпики:");
-		for (Task epic : getEpics()) {
-			System.out.println(epic);
-			System.out.println("--> Подзадачи эпика:");
-			for (Task task : getEpicSubtasks(epic.getId())) {
-				System.out.println("--> " + task);
-			}
-		}
-		System.out.println("Подзадачи:");
-		for (Task subtask : getSubtasks()) {
-			System.out.println(subtask);
-		}
-	}
-
 	@Override
 	public ArrayList<Task> getTasks() {
 		return new ArrayList<>(this.tasks.values());

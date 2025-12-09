@@ -17,15 +17,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
-
     private File file;
+    private FileBackedTaskManager backedManager;
 
     @BeforeEach
     public void initManager() {
         try {
             file = File.createTempFile("autosave", ".txt");
             file.deleteOnExit();
-            manager = Managers.getFileBacked(file);
+            manager = Managers.getDefault();
+            backedManager = Managers.getFileBacked(file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -36,11 +37,11 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
         Task task = new Task("Task 1", "Desc 1", TaskStatus.NEW);
         Epic epic = new Epic("Epic 1", "Desc epic");
 
-        manager.addNewTask(task);
-        manager.addNewEpic(epic);
+        backedManager.addNewTask(task);
+        backedManager.addNewEpic(epic);
 
         Subtask subtask = new Subtask("Subtask 1", "Desc sub", TaskStatus.IN_PROGRESS, epic.getId());
-        manager.addNewSubtask(subtask);
+        backedManager.addNewSubtask(subtask);
 
         List<String> lines = Files.readAllLines(file.toPath());
 
@@ -54,6 +55,29 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
 
     @Test
     public void loadFromFile_shouldRestoreTasksEpicsAndSubtasks() throws IOException {
-        super.loadFromFile_shouldRestoreTasksEpicsAndSubtasks();
+        File source = File.createTempFile("autosave-load", ".txt");
+        source.deleteOnExit();
+        String fileContent = String.join("\r\n",
+                "id,type,name,status,description,epic",
+                "7,TASK,Persisted task,NEW,Task description,",
+                "8,EPIC,Persisted epic,NEW,Epic description,",
+                "9,SUBTASK,Persisted subtask,DONE,Sub description,8"
+        );
+        Files.writeString(source.toPath(), fileContent);
+
+        backedManager.loadFromFile(source);
+
+        assertEquals(1, backedManager.getTasks().size(), "Должна загрузиться одна задача");
+        assertEquals(1, backedManager.getEpics().size(), "Должен загрузиться один эпик");
+        assertEquals(1, backedManager.getSubtasks().size(), "Должна загрузиться одна подзадача");
+
+        Task loadedTask = backedManager.getTask(7);
+        Epic loadedEpic = backedManager.getEpic(8);
+        Subtask loadedSubtask = backedManager.getSubtask(9);
+
+        assertEquals("Persisted task", loadedTask.getName(), "Имя задачи должно совпадать");
+        assertEquals("Persisted epic", loadedEpic.getName(), "Имя эпика должно совпадать");
+        assertEquals("Persisted subtask", loadedSubtask.getName(), "Имя подзадачи должно совпадать");
+        assertEquals(loadedEpic.getId(), loadedSubtask.getEpicId(), "Связь подзадачи с эпиком должна сохраниться");
     }
 }
