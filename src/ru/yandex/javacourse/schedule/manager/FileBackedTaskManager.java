@@ -1,38 +1,15 @@
 package ru.yandex.javacourse.schedule.manager;
 
-import ru.yandex.javacourse.schedule.tasks.Epic;
-import ru.yandex.javacourse.schedule.tasks.Subtask;
-import ru.yandex.javacourse.schedule.tasks.Task;
-import ru.yandex.javacourse.schedule.tasks.TaskStatus;
+import ru.yandex.javacourse.schedule.tasks.*;
 
 import java.io.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
-    File file;
+    private final File file;
 
     public FileBackedTaskManager(File file) {
         super();
         this.file = file;
-    }
-
-    private String formatFileLine(Task task) {
-        int id = task.getId();
-        String name = task.getName();
-        TaskStatus status = task.getStatus();
-        String description = task.getDescription();
-
-        String type;
-        String epicId = "";
-        if (task.getClass() == Subtask.class) {
-            type = "SUBTASK";
-            epicId = Integer.toString(((Subtask) task).getEpicId());
-        } else if (task.getClass() == Epic.class) {
-            type = "EPIC";
-        } else {
-            type = "TASK";
-        }
-
-        return String.format("%d,%s,%s,%s,%s,%s\r\n", id, type, name, status, description, epicId);
     }
 
     private void save() throws RuntimeException {
@@ -41,17 +18,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 fileWriter.write("id,type,name,status,description,epic\r\n");
             }
             for (Task task : super.getTasks()) {
-                String line = formatFileLine(task);
+                String line = TaskCsvConverter.formatFileLine(task);
                 fileWriter.write(line);
             }
 
             for (Epic epic : super.getEpics()) {
-                String line = formatFileLine(epic);
+                String line = TaskCsvConverter.formatFileLine(epic);
                 fileWriter.write(line);
             }
 
             for (Subtask subtask : super.getSubtasks()) {
-                String line = formatFileLine(subtask);
+                String line = TaskCsvConverter.formatFileLine(subtask);
                 fileWriter.write(line);
             }
 
