@@ -1,6 +1,5 @@
 package ru.yandex.javacourse.schedule.manager;
 
-import java.io.File;
 import java.util.List;
 
 import ru.yandex.javacourse.schedule.tasks.Epic;
