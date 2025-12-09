@@ -9,7 +9,6 @@ import java.io.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     File file;
-
     public FileBackedTaskManager(File file) {
         super();
         this.file = file;
@@ -103,5 +102,48 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public void updateEpic(Epic epic) {
         super.updateEpic(epic);
         save();
+    }
+
+    public static void main(String[] args) {
+        try {
+            File storage = args.length > 0 ? new File(args[0]) : File.createTempFile("kanban-demo", ".csv");
+            if (!storage.exists()) {
+                storage.createNewFile();
+            }
+
+            FileBackedTaskManager manager = Managers.getFileBacked(storage);
+
+            Task task1 = new Task("Задача 1", "Описание 1", TaskStatus.NEW);
+            Task task2 = new Task("Задача 2", "Описание 2", TaskStatus.IN_PROGRESS);
+            manager.addNewTask(task1);
+            manager.addNewTask(task2);
+
+            Epic epic1 = new Epic("Эпик 1", "Описание эпика 1");
+            manager.addNewEpic(epic1);
+            Subtask sub1 = new Subtask("Подзадача 1", "Описание подзадачи 1", TaskStatus.NEW, epic1.getId());
+            Subtask sub2 = new Subtask("Подзадача 2", "Описание подзадачи 2", TaskStatus.DONE, epic1.getId());
+            manager.addNewSubtask(sub1);
+            manager.addNewSubtask(sub2);
+
+            manager.printAllTasks();
+
+            FileBackedTaskManager restored = Managers.getFileBacked(storage);
+            restored.loadFromFile(storage);
+
+            boolean sameTasks = restored.getTasks().size() == manager.getTasks().size();
+            boolean sameEpics = restored.getEpics().size() == manager.getEpics().size();
+            boolean sameSubtasks = restored.getSubtasks().size() == manager.getSubtasks().size();
+
+            System.out.println("---------");
+            restored.printAllTasks();
+
+            if (sameTasks && sameEpics && sameSubtasks) {
+                System.out.println("Данные успешно восстановлены из файла: " + storage.getAbsolutePath());
+            } else {
+                System.out.println("Ошибка восстановления данных из файла: " + storage.getAbsolutePath());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -24,7 +24,7 @@ public class Main {
 		String enteredPath = scanner.nextLine();
 		Path path = Paths.get(enteredPath);
 
-		if (!path.toFile().isFile()) {
+		if (!path.toFile().exists()) {
 			try {
 				Files.createFile(path);
 			} catch (IOException exception) {
@@ -156,7 +156,7 @@ public class Main {
 		System.out.println("Эпики:");
 		for (Task epic : manager.getEpics()) {
 			System.out.println(epic);
-//			System.out.println("--> Подзадачи эпика:");
+			System.out.println("--> Подзадачи эпика:");
 			for (Task task : manager.getEpicSubtasks(epic.getId())) {
 				System.out.println("--> " + task);
 			}

@@ -71,6 +71,24 @@ public class InMemoryTaskManager implements TaskManager {
 		}
 	}
 
+	public void printAllTasks() {
+		System.out.println("Задачи:");
+		for (Task task : getTasks()) {
+			System.out.println(task);
+		}
+		System.out.println("Эпики:");
+		for (Task epic : getEpics()) {
+			System.out.println(epic);
+			System.out.println("--> Подзадачи эпика:");
+			for (Task task : getEpicSubtasks(epic.getId())) {
+				System.out.println("--> " + task);
+			}
+		}
+		System.out.println("Подзадачи:");
+		for (Task subtask : getSubtasks()) {
+			System.out.println(subtask);
+		}
+	}
 
 	@Override
 	public ArrayList<Task> getTasks() {
