@@ -7,6 +7,10 @@ import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.Task;
 import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -145,5 +149,33 @@ public class InMemoryTaskManagerTest {
         manager.addNewEpic(e1);
 
         assertNotEquals(e0.getId(), e1.getId(), "ids should be unequal");
+    }
+
+    @Test
+    public void loadFromFile_shouldRestoreTasksEpicsAndSubtasks() throws IOException {
+        File source = File.createTempFile("autosave-load", ".txt");
+        source.deleteOnExit();
+        String fileContent = String.join("\r\n",
+                "id,type,name,status,description,epic",
+                "7,TASK,Persisted task,NEW,Task description,",
+                "8,EPIC,Persisted epic,NEW,Epic description,",
+                "9,SUBTASK,Persisted subtask,DONE,Sub description,8"
+        );
+        Files.writeString(source.toPath(), fileContent);
+
+        manager.loadFromFile(source);
+
+        assertEquals(1, manager.getTasks().size(), "Должна загрузиться одна задача");
+        assertEquals(1, manager.getEpics().size(), "Должен загрузиться один эпик");
+        assertEquals(1, manager.getSubtasks().size(), "Должна загрузиться одна подзадача");
+
+        Task loadedTask = manager.getTask(7);
+        Epic loadedEpic = manager.getEpic(8);
+        Subtask loadedSubtask = manager.getSubtask(9);
+
+        assertEquals("Persisted task", loadedTask.getName(), "Имя задачи должно совпадать");
+        assertEquals("Persisted epic", loadedEpic.getName(), "Имя эпика должно совпадать");
+        assertEquals("Persisted subtask", loadedSubtask.getName(), "Имя подзадачи должно совпадать");
+        assertEquals(loadedEpic.getId(), loadedSubtask.getEpicId(), "Связь подзадачи с эпиком должна сохраниться");
     }
 }

@@ -39,6 +39,11 @@ public class InMemoryTaskManager implements TaskManager {
 				}
 
 				String[] lineSplit = line.split(",");
+
+				if (lineSplit.length < 5) {
+					break;
+				}
+
 				int id = Integer.parseInt(lineSplit[0]);
 				String type = lineSplit[1];
 				String name = lineSplit[2];
