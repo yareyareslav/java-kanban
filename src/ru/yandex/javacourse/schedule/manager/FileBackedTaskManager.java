@@ -1,5 +1,6 @@
 package ru.yandex.javacourse.schedule.manager;
 
+import ru.yandex.javacourse.schedule.exceptions.ManagerLoadException;
 import ru.yandex.javacourse.schedule.exceptions.ManagerSaveException;
 import ru.yandex.javacourse.schedule.tasks.*;
 
@@ -17,7 +18,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private void save() {
         try (Writer fileWriter = new FileWriter(file)) {
             if (file.length() == 0) {
-                fileWriter.write("id,type,name,status,description,epic\r\n");
+                fileWriter.write(TaskCsvConverter.getHeading() + "\r\n");
             }
             for (Task task : this.getTasks()) {
                 String line = TaskCsvConverter.formatFileLine(task);
@@ -39,27 +40,29 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    public void loadFromFile(File file) {
+    public static FileBackedTaskManager loadFromFile(File file) {
+        FileBackedTaskManager manager = Managers.getFileBacked(file);
         try (Reader fr = new FileReader(file); BufferedReader br = new BufferedReader(fr)) {
             while (br.ready()) {
                 String line = br.readLine();
-                String[] lineSplit = line.split(",");
-                Optional<Task> convertedTask = TaskCsvConverter.fromFileLineToTask(lineSplit);
+                Optional<Task> convertedTask = TaskCsvConverter.fromFileLineToTask(line);
 
                 if (convertedTask.isEmpty()) {
                     continue;
                 }
 
-                switch (convertedTask.get().getType()) {
-                    case TaskType.TASK -> this.addNewTask(convertedTask.get());
-                    case TaskType.SUBTASK -> this.addNewSubtask((Subtask) convertedTask.get());
-                    case TaskType.EPIC -> this.addNewEpic((Epic) convertedTask.get());
+                Task task = convertedTask.get();
+
+                switch (task.getType()) {
+                    case TaskType.TASK -> manager.tasks.put(task.getId(), task);
+                    case TaskType.SUBTASK -> manager.subtasks.put(task.getId(), (Subtask) task);
+                    case TaskType.EPIC -> manager.epics.put(task.getId(), (Epic) task);
                 }
             }
         } catch (IOException exception) {
-            throw new RuntimeException(exception);
+            throw new ManagerLoadException(exception.getMessage());
         }
-        save();
+        return manager;
     }
 
     @Override
@@ -161,8 +164,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
             ManagerPrinter.printAllTasks(manager);
 
-            FileBackedTaskManager restored = Managers.getFileBacked(storage);
-            restored.loadFromFile(storage);
+            FileBackedTaskManager restored = FileBackedTaskManager.loadFromFile(storage);
 
             boolean sameTasks = restored.getTasks().size() == manager.getTasks().size();
             boolean sameEpics = restored.getEpics().size() == manager.getEpics().size();

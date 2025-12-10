@@ -4,6 +4,11 @@ import java.util.Optional;
 
 public class TaskCsvConverter {
     private static final String HEADING = "id,type,name,status,description,epic";
+
+    public static String getHeading() {
+        return HEADING;
+    }
+
     public static String formatFileLine(Task task) {
         int id = task.getId();
         String name = task.getName();
@@ -36,10 +41,12 @@ public class TaskCsvConverter {
         return String.format("%d,%s,%s,%s,%s,\r\n", id, type, name, status, description);
     }
 
-    public static Optional<Task> fromFileLineToTask(String[] lineSplit) {
-        if (String.join(",", lineSplit).contains(HEADING)) {
+    public static Optional<Task> fromFileLineToTask(String line) {
+        if (line.contains(HEADING)) {
             return Optional.empty();
         }
+
+        String[] lineSplit = line.split(",");
 
         if (lineSplit.length < 5) {
             return Optional.empty();

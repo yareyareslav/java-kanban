@@ -1,6 +1,5 @@
 package ru.yandex.javacourse.schedule.manager;
 
-import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.javacourse.schedule.tasks.Epic;
@@ -11,7 +10,6 @@ import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -66,7 +64,7 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
         );
         Files.writeString(source.toPath(), fileContent);
 
-        backedManager.loadFromFile(source);
+        backedManager = FileBackedTaskManager.loadFromFile(source);
 
         assertEquals(1, backedManager.getTasks().size(), "Должна загрузиться одна задача");
         assertEquals(1, backedManager.getEpics().size(), "Должен загрузиться один эпик");
@@ -98,8 +96,7 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
 
         File newFile = File.createTempFile("autosave", ".txt");
         newFile.deleteOnExit();
-        FileBackedTaskManager newManager = new FileBackedTaskManager(newFile);
-        newManager.loadFromFile(file);
+        FileBackedTaskManager newManager = FileBackedTaskManager.loadFromFile(file);
 
         assertEquals(1, newManager.getTasks().size(), "Должна быть одна задача");
         assertEquals(List.of(task2), newManager.getTasks(), "Должна быть задача с id 2");
@@ -126,8 +123,7 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
 
         File newFile = File.createTempFile("autosave", ".txt");
         newFile.deleteOnExit();
-        FileBackedTaskManager newManager = new FileBackedTaskManager(newFile);
-        newManager.loadFromFile(file);
+        FileBackedTaskManager newManager = FileBackedTaskManager.loadFromFile(file);
 
         assertEquals(0, newManager.getTasks().size(), "Задач быть не должно");
         assertEquals(1, newManager.getEpics().size(), "Должен быть один эпик");
