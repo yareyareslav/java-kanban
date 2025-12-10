@@ -1,6 +1,6 @@
 package ru.yandex.javacourse.schedule.manager;
 
-import ru.yandex.javacourse.schedule.exceptions.SaveException;
+import ru.yandex.javacourse.schedule.exceptions.ManagerSaveException;
 import ru.yandex.javacourse.schedule.tasks.*;
 
 import java.io.*;
@@ -13,7 +13,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this.file = file;
     }
 
-    private void save() throws SaveException {
+    private void save() {
         try (Writer fileWriter = new FileWriter(file)) {
             if (file.length() == 0) {
                 fileWriter.write("id,type,name,status,description,epic\r\n");
@@ -34,7 +34,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
 
         } catch (IOException exception) {
-            throw new SaveException(exception.getMessage());
+            throw new ManagerSaveException(exception.getMessage());
         }
     }
 
