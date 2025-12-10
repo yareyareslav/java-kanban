@@ -4,6 +4,7 @@ import ru.yandex.javacourse.schedule.exceptions.ManagerSaveException;
 import ru.yandex.javacourse.schedule.tasks.*;
 
 import java.io.*;
+import java.util.Optional;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
@@ -42,37 +43,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         try (Reader fr = new FileReader(file); BufferedReader br = new BufferedReader(fr)) {
             while (br.ready()) {
                 String line = br.readLine();
+                String[] lineSplit = line.split(",");
+                Optional<Task> convertedTask = TaskCsvConverter.fromFileLineToTask(lineSplit);
 
-                if (line.contains("id,type,name,status,description,epic")) {
+                if (convertedTask.isEmpty()) {
                     continue;
                 }
 
-                String[] lineSplit = line.split(",");
-
-                if (lineSplit.length < 5) {
-                    break;
-                }
-
-                int id = Integer.parseInt(lineSplit[0]);
-                String type = lineSplit[1];
-                String name = lineSplit[2];
-                TaskStatus status = TaskStatus.valueOf(lineSplit[3]);
-                String description = lineSplit[4];
-
-                switch (type) {
-                    case "TASK":
-                        Task task = new Task(id, name, description, status);
-                        this.addNewTask(task);
-                        break;
-                    case "SUBTASK":
-                        int epicId = Integer.parseInt(lineSplit[5]);
-                        Subtask subtask = new Subtask(id, name, description, status, epicId);
-                        this.addNewSubtask(subtask);
-                        break;
-                    case "EPIC":
-                        Epic epic = new Epic(id, name, description);
-                        this.addNewEpic(epic);
-                        break;
+                switch (convertedTask.get().getType()) {
+                    case TaskType.TASK -> this.addNewTask(convertedTask.get());
+                    case TaskType.SUBTASK -> this.addNewSubtask((Subtask) convertedTask.get());
+                    case TaskType.EPIC -> this.addNewEpic((Epic) convertedTask.get());
                 }
             }
         } catch (IOException exception) {
