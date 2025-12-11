@@ -1,6 +1,5 @@
 package ru.yandex.javacourse.schedule.manager;
 
-import ru.yandex.javacourse.schedule.exceptions.ManagerLoadException;
 import ru.yandex.javacourse.schedule.exceptions.ManagerSaveException;
 import ru.yandex.javacourse.schedule.tasks.*;
 
@@ -21,18 +20,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 fileWriter.write(TaskCsvConverter.getHeading() + "\r\n");
             }
             for (Task task : this.getTasks()) {
-                String line = TaskCsvConverter.formatFileLine(task);
-                fileWriter.write(line);
+                fileWriter.write(TaskCsvConverter.taskToString(task));
             }
 
             for (Epic epic : super.getEpics()) {
-                String line = TaskCsvConverter.formatFileLine(epic);
-                fileWriter.write(line);
+                fileWriter.write(TaskCsvConverter.taskToString(epic));
             }
 
             for (Subtask subtask : super.getSubtasks()) {
-                String line = TaskCsvConverter.formatFileLine(subtask);
-                fileWriter.write(line);
+                fileWriter.write(TaskCsvConverter.taskToString(subtask));
             }
 
         } catch (IOException exception) {
@@ -41,11 +37,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     public static FileBackedTaskManager loadFromFile(File file) {
-        FileBackedTaskManager manager = Managers.getFileBacked(file);
+        FileBackedTaskManager manager = new FileBackedTaskManager(file);
         try (Reader fr = new FileReader(file); BufferedReader br = new BufferedReader(fr)) {
             while (br.ready()) {
                 String line = br.readLine();
-                Optional<Task> convertedTask = TaskCsvConverter.fromFileLineToTask(line);
+                Optional<Task> convertedTask = TaskCsvConverter.stringToTask(line);
 
                 if (convertedTask.isEmpty()) {
                     continue;
@@ -55,12 +51,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
                 switch (task.getType()) {
                     case TaskType.TASK -> manager.tasks.put(task.getId(), task);
-                    case TaskType.SUBTASK -> manager.subtasks.put(task.getId(), (Subtask) task);
+                    case TaskType.SUBTASK -> {
+                        final int epicId = ((Subtask) task).getEpicId();
+                        Epic epic = manager.epics.get(epicId);
+                        if (epic == null) {
+                            return null;
+                        }
+                        manager.subtasks.put(task.getId(), (Subtask) task);
+                        epic.addSubtaskId(task.getId());
+                        manager.updateEpicStatus(epicId);
+                    }
                     case TaskType.EPIC -> manager.epics.put(task.getId(), (Epic) task);
                 }
             }
         } catch (IOException exception) {
-            throw new ManagerLoadException(exception.getMessage());
+            throw new ManagerSaveException(exception.getMessage());
         }
         return manager;
     }

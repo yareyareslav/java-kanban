@@ -13,7 +13,7 @@ public class Managers {
 	}
 
 	public static FileBackedTaskManager getFileBacked(File file) {
-		return new FileBackedTaskManager(file);
+		return FileBackedTaskManager.loadFromFile(file);
 	}
 
 	public static HistoryManager getDefaultHistory() {

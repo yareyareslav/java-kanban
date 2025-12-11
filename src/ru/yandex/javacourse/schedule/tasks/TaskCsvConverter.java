@@ -9,7 +9,7 @@ public class TaskCsvConverter {
         return HEADING;
     }
 
-    public static String formatFileLine(Task task) {
+    public static String taskToString(Task task) {
         int id = task.getId();
         String name = task.getName();
         TaskStatus status = task.getStatus();
@@ -19,7 +19,7 @@ public class TaskCsvConverter {
         return String.format("%d,%s,%s,%s,%s,\r\n", id, type, name, status, description);
     }
 
-    public static String formatFileLine(Subtask subtask) {
+    public static String taskToString(Subtask subtask) {
         int id = subtask.getId();
         String name = subtask.getName();
         TaskStatus status = subtask.getStatus();
@@ -30,7 +30,7 @@ public class TaskCsvConverter {
         return String.format("%d,%s,%s,%s,%s,%s\r\n", id, type, name, status, description, epicId);
     }
 
-    public static String formatFileLine(Epic epic) {
+    public static String taskToString(Epic epic) {
         int id = epic.getId();
         String name = epic.getName();
         TaskStatus status = epic.getStatus();
@@ -41,7 +41,7 @@ public class TaskCsvConverter {
         return String.format("%d,%s,%s,%s,%s,\r\n", id, type, name, status, description);
     }
 
-    public static Optional<Task> fromFileLineToTask(String line) {
+    public static Optional<Task> stringToTask(String line) {
         if (line.contains(HEADING)) {
             return Optional.empty();
         }
@@ -58,17 +58,14 @@ public class TaskCsvConverter {
         TaskStatus status = TaskStatus.valueOf(lineSplit[3]);
         String description = lineSplit[4];
 
-        switch (type) {
-            case TaskType.TASK:
-                return Optional.of(new Task(id, name, description, status));
-            case TaskType.SUBTASK:
+        return switch (type) {
+            case TaskType.TASK -> Optional.of(new Task(id, name, description, status));
+            case TaskType.SUBTASK -> {
                 int epicId = Integer.parseInt(lineSplit[5]);
-                return Optional.of(new Subtask(id, name, description, status, epicId));
-            case TaskType.EPIC:
-                return Optional.of(new Epic(id, name, description));
-            default:
-                return Optional.empty();
-        }
+                yield Optional.of(new Subtask(id, name, description, status, epicId));
+            }
+            case TaskType.EPIC -> Optional.of(new Epic(id, name, description));
+        };
     }
 
 
