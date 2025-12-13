@@ -3,11 +3,9 @@ package ru.yandex.javacourse.schedule.manager;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.IN_PROGRESS;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
@@ -118,6 +116,7 @@ public class InMemoryTaskManager implements TaskManager {
 		}
 		subtasks.put(id, subtask);
 		epic.addSubtaskId(subtask.getId());
+		updateEpicEndTime(epicId);
 		updateEpicStatus(epicId);
 		return id;
 	}
@@ -152,6 +151,7 @@ public class InMemoryTaskManager implements TaskManager {
 			return;
 		}
 		subtasks.put(id, subtask);
+		updateEpicEndTime(epicId);
 		updateEpicStatus(epicId);
 	}
 
@@ -180,6 +180,7 @@ public class InMemoryTaskManager implements TaskManager {
 		historyManager.remove(id);
 		Epic epic = epics.get(subtask.getEpicId());
 		epic.removeSubtask(id);
+		updateEpicEndTime(epic.getId());
 		updateEpicStatus(epic.getId());
 	}
 
@@ -192,6 +193,7 @@ public class InMemoryTaskManager implements TaskManager {
 	public void deleteSubtasks() {
 		for (Epic epic : epics.values()) {
 			epic.cleanSubtaskIds();
+			updateEpicEndTime(epic.getId());
 			updateEpicStatus(epic.getId());
 		}
 		subtasks.clear();
@@ -231,5 +233,32 @@ public class InMemoryTaskManager implements TaskManager {
 			return;
 		}
 		epic.setStatus(status);
+	}
+
+	protected void updateEpicEndTime(int epicId) {
+		Epic epic = epics.get(epicId);
+
+		List<Subtask> relevantSubtasks = getSubtasks()
+				.stream()
+				.filter((sub) -> sub.getEpicId() == epic.getId())
+				.toList();
+
+		Optional<LocalDateTime> maybeStartTime = relevantSubtasks
+				.stream()
+				.map(Subtask::getStartTime)
+				.filter(Objects::nonNull)
+				.max(LocalDateTime::compareTo);
+
+		Duration totalSubtasksDuration = relevantSubtasks
+				.stream()
+				.map(Subtask::getDuration)
+				.filter(Objects::nonNull)
+				.reduce(Duration.ZERO, Duration::plus);
+
+		if (maybeStartTime.isEmpty()) {
+			return;
+		}
+		epic.setStartTime(maybeStartTime.get());
+		epic.setDuration(totalSubtasksDuration);
 	}
 }
