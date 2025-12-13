@@ -9,6 +9,7 @@ public class Subtask extends Task {
 		super(id, name, description, status);
 		if (epicId == id) throw new InvalidEpicIdException("EpicID should not be equal to subtaskID");
 		this.epicId = epicId;
+		this.type = TaskType.SUBTASK;
 	}
 
 	public Subtask(String name, String description, TaskStatus status, int epicId) {

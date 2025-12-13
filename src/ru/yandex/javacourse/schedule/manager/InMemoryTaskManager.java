@@ -3,6 +3,7 @@ package ru.yandex.javacourse.schedule.manager;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.IN_PROGRESS;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,9 +16,9 @@ import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 
 public class InMemoryTaskManager implements TaskManager {
 
-	private final Map<Integer, Task> tasks = new HashMap<>();
-	private final Map<Integer, Epic> epics = new HashMap<>();
-	private final Map<Integer, Subtask> subtasks = new HashMap<>();
+	protected final Map<Integer, Task> tasks = new HashMap<>();
+	protected final Map<Integer, Epic> epics = new HashMap<>();
+	protected final Map<Integer, Subtask> subtasks = new HashMap<>();
 	private int generatorId = 1;
 	private final HistoryManager historyManager = Managers.getDefaultHistory();
 
@@ -27,7 +28,6 @@ public class InMemoryTaskManager implements TaskManager {
 		}
 		return generatorId;
 	}
-
 
 	@Override
 	public ArrayList<Task> getTasks() {
@@ -208,7 +208,7 @@ public class InMemoryTaskManager implements TaskManager {
 		return historyManager.getTasks();
 	}
 
-	private void updateEpicStatus(int epicId) {
+	protected void updateEpicStatus(int epicId) {
 		Epic epic = epics.get(epicId);
 		List<Integer> subs = epic.getSubtaskIds();
 		if (subs.isEmpty()) {

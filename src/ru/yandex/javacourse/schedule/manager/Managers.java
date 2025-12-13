@@ -1,5 +1,7 @@
 package ru.yandex.javacourse.schedule.manager;
 
+import java.io.File;
+
 /**
  * Default managers.
  *
@@ -8,6 +10,10 @@ package ru.yandex.javacourse.schedule.manager;
 public class Managers {
 	public static TaskManager getDefault() {
 		return new InMemoryTaskManager();
+	}
+
+	public static FileBackedTaskManager getFileBacked(File file) {
+		return FileBackedTaskManager.loadFromFile(file);
 	}
 
 	public static HistoryManager getDefaultHistory() {
