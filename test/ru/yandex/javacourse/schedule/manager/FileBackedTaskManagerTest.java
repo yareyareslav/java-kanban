@@ -23,7 +23,7 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
         try {
             file = File.createTempFile("autosave", ".txt");
             file.deleteOnExit();
-            manager = Managers.getFileBacked(file);
+            manager = FileBackedTaskManager.loadFromFile(file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
