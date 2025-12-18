@@ -84,16 +84,12 @@ public class Task {
 		return type;
 	}
 
-	public LocalDateTime getStartTime() {
-		return startTime;
+	public Optional<LocalDateTime> getStartTime() {
+		return startTime != null ? Optional.of(startTime) : Optional.empty();
 	}
 
-	public Duration getDuration() {
-		return duration;
-	}
-
-	protected void setDuration(Duration duration) {
-		this.duration = duration;
+	public Optional<Duration> getDuration() {
+		return duration != null ? Optional.of(duration) : Optional.empty();
 	}
 
 	public Optional<LocalDateTime> getEndTime() {

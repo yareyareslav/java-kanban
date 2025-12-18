@@ -8,6 +8,7 @@ import java.util.*;
 
 public class Epic extends Task {
 	protected ArrayList<Integer> subtaskIds = new ArrayList<>();
+	protected LocalDateTime endTime;
 
 	public Epic(int id, String name, String description) {
 		super(id, name, description, NEW);
@@ -40,12 +41,21 @@ public class Epic extends Task {
 		subtaskIds.remove(Integer.valueOf(id));
 	}
 
+	public void setDuration(Duration duration) {
+		this.duration = duration;
+	}
+
 	public void setStartTime(LocalDateTime startTime) {
 		this.startTime = startTime;
 	}
 
-	public void setDuration(Duration duration) {
-		this.duration = duration;
+	public void setEndTime(LocalDateTime endTime) {
+		this.endTime = endTime;
+	}
+
+	@Override
+	public Optional<LocalDateTime> getEndTime() {
+		return endTime != null ? Optional.of(endTime) : Optional.empty();
 	}
 
 	@Override
@@ -56,6 +66,8 @@ public class Epic extends Task {
 				", status=" + status +
 				", description='" + description + '\'' +
 				", subtaskIds=" + subtaskIds +
+				", duration='" + duration + '\'' +
+				", endTime='" + (getEndTime().isPresent() ? getEndTime().get() : null) + '\'' +
 				'}';
 	}
 }
