@@ -9,10 +9,10 @@ import java.util.*;
 public class Epic extends Task {
 	protected ArrayList<Integer> subtaskIds = new ArrayList<>();
 	protected LocalDateTime endTime;
+	public static final TaskType type = TaskType.EPIC;
 
 	public Epic(int id, String name, String description) {
 		super(id, name, description, NEW);
-		this.type = TaskType.EPIC;
 		this.startTime = null;
 		this.duration = null;
 	}
@@ -51,6 +51,11 @@ public class Epic extends Task {
 
 	public void setEndTime(LocalDateTime endTime) {
 		this.endTime = endTime;
+	}
+
+	@Override
+	public TaskType getType() {
+		return type;
 	}
 
 	@Override

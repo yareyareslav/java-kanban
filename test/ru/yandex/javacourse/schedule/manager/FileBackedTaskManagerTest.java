@@ -2,10 +2,7 @@ package ru.yandex.javacourse.schedule.manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.javacourse.schedule.tasks.Epic;
-import ru.yandex.javacourse.schedule.tasks.Subtask;
-import ru.yandex.javacourse.schedule.tasks.Task;
-import ru.yandex.javacourse.schedule.tasks.TaskStatus;
+import ru.yandex.javacourse.schedule.tasks.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,10 +40,10 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
         List<String> lines = Files.readAllLines(file.toPath());
 
         assertEquals(4, lines.size(), "Файл должен содержать заголовок и три строки сущностей");
-        assertEquals("id,type,name,status,description,epic", lines.getFirst(), "Ожидается заголовок CSV");
-        assertTrue(lines.contains("1,TASK,Task 1,NEW,Desc 1,"), "Файл должен содержать строку задачи");
-        assertTrue(lines.contains("2,EPIC,Epic 1,IN_PROGRESS,Desc epic,"), "Файл должен содержать строку эпика");
-        assertTrue(lines.contains("3,SUBTASK,Subtask 1,IN_PROGRESS,Desc sub,2"), "Файл должен содержать строку подзадачи");
+        assertEquals(TaskCsvConverter.getHeading(), lines.getFirst(), "Ожидается заголовок CSV");
+        assertTrue(lines.contains("1,TASK,Task 1,NEW,Desc 1,null,null,null"), "Файл должен содержать строку задачи");
+        assertTrue(lines.contains("2,EPIC,Epic 1,IN_PROGRESS,Desc epic,null,null,null"), "Файл должен содержать строку эпика");
+        assertTrue(lines.contains("3,SUBTASK,Subtask 1,IN_PROGRESS,Desc sub,2,null,null"), "Файл должен содержать строку подзадачи");
     }
 
 
@@ -55,10 +52,10 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
         File source = File.createTempFile("autosave-load", ".txt");
         source.deleteOnExit();
         String fileContent = String.join("\r\n",
-                "id,type,name,status,description,epic",
-                "7,TASK,Persisted task,NEW,Task description,",
-                "8,EPIC,Persisted epic,NEW,Epic description,",
-                "9,SUBTASK,Persisted subtask,DONE,Sub description,8"
+                TaskCsvConverter.getHeading(),
+                "7,TASK,Persisted task,NEW,Task description,null,null,null",
+                "8,EPIC,Persisted epic,NEW,Epic description,null,null,null",
+                "9,SUBTASK,Persisted subtask,DONE,Sub description,8,null,null"
         );
         Files.writeString(source.toPath(), fileContent);
 
