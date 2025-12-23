@@ -68,5 +68,4 @@ public class InMemoryHistoryManagerTest {
         ArrayList<Task> tasks3 = historyManager.getTasks();
         assertEquals(Arrays.asList(task1, task3, task2), tasks3, "history manager should change the position of the task2");
     }
-
 }
