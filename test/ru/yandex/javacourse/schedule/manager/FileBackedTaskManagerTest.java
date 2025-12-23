@@ -7,6 +7,8 @@ import ru.yandex.javacourse.schedule.tasks.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -129,7 +131,7 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
     }
 
     @Test
-    public void loadFromFile_taskIdsShouldBeDifferent_addTaskWithExistingId() throws IOException {
+    public void loadFromFile_taskIdsShouldBeDifferent_addTaskWithExistingId() {
         Task task1 = new Task(1,"Task 1", "Desc Task", TaskStatus.NEW);
 
         manager.addNewTask(task1);
@@ -145,7 +147,7 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
     }
 
     @Test
-    public void loadFromFile_epicsShouldHaveSubtasks() throws IOException {
+    public void loadFromFile_epicsShouldHaveSubtasks() {
         Epic epic = new Epic(1, "Epic", "Desc Epic");
         Subtask subtask1 = new Subtask(2,"Task 1", "Desc Task", TaskStatus.NEW, 1);
         Subtask subtask2 = new Subtask(2,"Task 2", "Desc Task", TaskStatus.NEW, 1);
@@ -158,4 +160,33 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
 
         assertEquals(2, newManager.getEpic(epic.getId()).getSubtaskIds().size(), "В эпике должно быть 2 подзадачи");
     }
+
+    @Test
+    public void loadFromFile_shouldRestoreTasksWithTime() {
+        super.getEndTime_shouldCalcEndTime_ifStartTimeAndDurationAreProvided();
+
+        TaskManager newManager = Managers.getFileBacked(file);
+        Task task = newManager.getTask(1);
+        Epic epic = newManager.getEpic(2);
+        Subtask subtask = newManager.getSubtask(3);
+
+        assertEquals(manager.getTask(1), task, "Задача должно быть равен предыдущей версии");
+        assertEquals(manager.getEpic(2), epic, "Эпик должен быть равен предыдущей версии");
+        assertEquals(manager.getSubtask(3), subtask, "Подзадача должно быть равен предыдущей версии");
+    }
+
+    @Test
+    public void getEndTime_shouldRestoreTasksWithTime() {
+        super.getEndTime_shouldCalcEndTime_ifStartTimeAndDurationAreProvided();
+
+        TaskManager newManager = Managers.getFileBacked(file);
+        Task task = newManager.getTask(1);
+        Epic epic = newManager.getEpic(2);
+        Subtask subtask = newManager.getSubtask(3);
+
+        assertEquals(manager.getTask(1).getEndTime().get(), task.getEndTime().get(), "Задача должна заканчиваться в то же время");
+        assertEquals(manager.getEpic(2).getEndTime().get(), epic.getEndTime().get(), "Эпик должен заканчиваться в то же время");
+        assertEquals(manager.getSubtask(3).getEndTime().get(), subtask.getEndTime().get(), "Подзадача должна заканчиваться в то же время");
+    }
+
 }

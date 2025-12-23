@@ -8,7 +8,7 @@ import java.util.Optional;
 public class TaskCsvConverter {
     private static final String HEADING = "id,type,name,status,description,epic,duration,startTime";
     private static final String FORMAT = "%d,%s,%s,%s,%s,%s,%s,%s\r\n";
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy|HH:mm");
 
     public static String getHeading() {
         return HEADING;
