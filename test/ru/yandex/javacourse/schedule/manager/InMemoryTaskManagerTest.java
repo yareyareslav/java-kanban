@@ -32,7 +32,7 @@ public class InMemoryTaskManagerTest {
         assertEquals(1, manager.getTasks().size(), "task should be added");
         Task addedTask = manager.getTasks().get(0);
         assertEquals(task, addedTask, "added task id should be set");
-        Task byIdTask = manager.getTask(task.getId());
+        Task byIdTask = manager.getTask(task.getId()).get();
         assertEquals(task, byIdTask, "added task id should be found");
     }
 
@@ -75,7 +75,7 @@ public class InMemoryTaskManagerTest {
         TaskStatus status = TaskStatus.NEW;
         Task task1before = new Task(id, name, description, status);
         manager.addNewTask(task1before);
-        Task task1after = manager.getTask(task1before.getId());
+        Task task1after = manager.getTask(task1before.getId()).get();
         assertEquals(task1after.getId(), id);
         assertEquals(task1after.getDescription(), description);
         assertEquals(task1after.getStatus(), status);
