@@ -263,4 +263,56 @@ public class InMemoryTaskManagerTest {
         );
         assertEquals("Подзадача пересекается по времени с другими задачами", exception.getMessage());
     }
+
+    @Test
+    public void updateEpicStatus_shouldBeNew_allSubtasksNew() {
+        Epic epic = new Epic(1, "Epic 1", "Testing epic 1");
+        Subtask subtask1 = new Subtask(2, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 1);
+        Subtask subtask2 = new Subtask(3, "Sub 2", "Testing subtask 2", TaskStatus.NEW, 1);
+
+        manager.addNewEpic(epic);
+        manager.addNewSubtask(subtask1);
+        manager.addNewSubtask(subtask2);
+
+        assertEquals(TaskStatus.NEW, epic.getStatus(), "Статус эпика должен быть NEW");
+    }
+
+    @Test
+    public void updateEpicStatus_shouldBeDone_allSubtasksDone() {
+        Epic epic = new Epic(1, "Epic 1", "Testing epic 1");
+        Subtask subtask1 = new Subtask(2, "Sub 1", "Testing subtask 1", TaskStatus.DONE, 1);
+        Subtask subtask2 = new Subtask(3, "Sub 2", "Testing subtask 2", TaskStatus.DONE, 1);
+
+        manager.addNewEpic(epic);
+        manager.addNewSubtask(subtask1);
+        manager.addNewSubtask(subtask2);
+
+        assertEquals(TaskStatus.DONE, epic.getStatus(), "Статус эпика должен быть DONE");
+    }
+
+    @Test
+    public void updateEpicStatus_shouldBeInProgress_oneSubtaskNewRestSubtasksDone() {
+        Epic epic = new Epic(1, "Epic 1", "Testing epic 1");
+        Subtask subtask1 = new Subtask(2, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 1);
+        Subtask subtask2 = new Subtask(3, "Sub 2", "Testing subtask 2", TaskStatus.DONE, 1);
+
+        manager.addNewEpic(epic);
+        manager.addNewSubtask(subtask1);
+        manager.addNewSubtask(subtask2);
+
+        assertEquals(TaskStatus.IN_PROGRESS, epic.getStatus(), "Статус эпика должен быть IN_PROGRESS");
+    }
+
+    @Test
+    public void updateEpicStatus_shouldBeInProgress_allInProgress() {
+        Epic epic = new Epic(1, "Epic 1", "Testing epic 1");
+        Subtask subtask1 = new Subtask(2, "Sub 1", "Testing subtask 1", TaskStatus.IN_PROGRESS, 1);
+        Subtask subtask2 = new Subtask(3, "Sub 2", "Testing subtask 2", TaskStatus.IN_PROGRESS, 1);
+
+        manager.addNewEpic(epic);
+        manager.addNewSubtask(subtask1);
+        manager.addNewSubtask(subtask2);
+
+        assertEquals(TaskStatus.IN_PROGRESS, epic.getStatus(), "Статус эпика должен быть IN_PROGRESS");
+    }
 }

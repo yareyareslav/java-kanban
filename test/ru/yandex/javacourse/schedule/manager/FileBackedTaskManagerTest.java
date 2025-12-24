@@ -188,5 +188,4 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
         assertEquals(manager.getEpic(2).get().getEndTime().get(), epic.getEndTime().get(), "Эпик должен заканчиваться в то же время");
         assertEquals(manager.getSubtask(3).get().getEndTime().get(), subtask.getEndTime().get(), "Подзадача должна заканчиваться в то же время");
     }
-
 }
