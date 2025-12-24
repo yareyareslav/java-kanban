@@ -105,6 +105,4 @@ public class TaskCsvConverter {
             case TaskType.EPIC -> Optional.of(new Epic(id, name, description));
         };
     }
-
-
 }

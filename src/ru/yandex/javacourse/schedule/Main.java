@@ -3,10 +3,7 @@ package ru.yandex.javacourse.schedule;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.DONE;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
 
-import ru.yandex.javacourse.schedule.manager.FileBackedTaskManager;
-import ru.yandex.javacourse.schedule.manager.ManagerPrinter;
-import ru.yandex.javacourse.schedule.manager.Managers;
-import ru.yandex.javacourse.schedule.manager.TaskManager;
+import ru.yandex.javacourse.schedule.manager.*;
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.Task;
@@ -22,9 +19,9 @@ import java.util.Scanner;
 public class Main {
 	public static void main(String[] args) {
 		System.out.println("--- EXTRA TASK ---");
-		TaskManager extraTM = Managers.getDefault();
+		InMemoryTaskManager extraTM = Managers.getDefault();
 
-		Task extraTask1 = new Task("Task #1", "Task1 description", NEW, Duration.ofMinutes(70), LocalDateTime.of(2015, 12, 30, 12, 50));
+		Task extraTask1 = new Task("Task #1", "Task1 description", NEW);
 		Task extraTask2 = new Task("Task #2", "Task2 description", NEW, Duration.ofMinutes(50), LocalDateTime.of(2017, 12, 30, 12, 50));
 		extraTM.addNewTask(extraTask1);
 		extraTM.addNewTask(extraTask2);
@@ -42,6 +39,7 @@ public class Main {
 		extraTM.addNewSubtask(extraSubtask2);
 		extraTM.addNewSubtask(extraSubtask3);
 
+		System.out.println(extraTM.getPrioritizedTasks());
 		ManagerPrinter.printAllTasks(extraTM);
 
 	}

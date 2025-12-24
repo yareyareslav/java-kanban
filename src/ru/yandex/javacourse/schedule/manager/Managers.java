@@ -8,7 +8,7 @@ import java.io.File;
  * @author Vladimir Ivanov (ivanov.vladimir.l@gmail.com)
  */
 public class Managers {
-	public static TaskManager getDefault() {
+	public static InMemoryTaskManager getDefault() {
 		return new InMemoryTaskManager();
 	}
 
