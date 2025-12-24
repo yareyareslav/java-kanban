@@ -34,7 +34,7 @@ public class Main {
 		int extraEpic1Id = extraEpic1.getId();
 		Subtask extraSubtask1 = new Subtask("Subtask #1-1", "Subtask1 description", NEW, extraEpic1Id, Duration.ofMinutes(70), LocalDateTime.of(2015, 12, 30, 12, 50));
 		Subtask extraSubtask2 = new Subtask("Subtask #2-1", "Subtask1 description", NEW, extraEpic1Id, Duration.ofMinutes(70), LocalDateTime.of(2016, 12, 30, 12, 50));
-		Subtask extraSubtask3 = new Subtask("Subtask #3-1", "Subtask1 description", DONE, extraEpic1Id, Duration.ofMinutes(70), LocalDateTime.of(2017, 12, 30, 12, 50));
+		Subtask extraSubtask3 = new Subtask("Subtask #3-1", "Subtask1 description", DONE, extraEpic1Id, Duration.ofMinutes(70), LocalDateTime.of(2018, 12, 30, 12, 50));
 		extraTM.addNewSubtask(extraSubtask1);
 		extraTM.addNewSubtask(extraSubtask2);
 		extraTM.addNewSubtask(extraSubtask3);

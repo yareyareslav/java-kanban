@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import ru.yandex.javacourse.schedule.exceptions.InvalidTaskCompletionTime;
 import ru.yandex.javacourse.schedule.tasks.*;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -20,7 +21,7 @@ public class InMemoryTaskManager implements TaskManager {
 
 	private final Comparator<Task> prioritizedTasksComparator = Comparator
 			.<Task, LocalDateTime>comparing(task -> task.getStartTime().orElseThrow())
-			.thenComparing(task -> task.getType() == TaskType.TASK ? 0 : 1);
+			.thenComparing(Task::getId);
 	private final TreeSet<Task> prioritizedTasks = new TreeSet<>(prioritizedTasksComparator);
 
 	private int generateId() {
@@ -36,6 +37,27 @@ public class InMemoryTaskManager implements TaskManager {
 			return;
 		}
 		prioritizedTasks.add(task);
+	}
+
+	private boolean doesIntersectByTime(Task task) {
+		if (prioritizedTasks.isEmpty()) {
+			return false;
+		}
+		Optional<LocalDateTime> maybeStart = task.getStartTime();
+		Optional<LocalDateTime> maybeEnd = task.getEndTime();
+		if (maybeStart.isEmpty() || maybeEnd.isEmpty()) {
+			return false;
+		}
+		LocalDateTime startTime = maybeStart.get();
+		LocalDateTime endTime = maybeEnd.get();
+
+        return prioritizedTasks.stream()
+                .anyMatch(t -> {
+//					Можно без проверки, так как в prioritizedTasks попадают только задачи с временем выполнения
+                    LocalDateTime curStart = t.getStartTime().get();
+                    LocalDateTime curEnd = t.getEndTime().get();
+                    return !(endTime.isBefore(curStart) || startTime.isAfter(curEnd));
+                });
 	}
 
 	@Override
@@ -87,6 +109,9 @@ public class InMemoryTaskManager implements TaskManager {
 
 	@Override
 	public int addNewTask(Task task) {
+		if (doesIntersectByTime(task)) {
+			throw new InvalidTaskCompletionTime("Задача пересекается по времени с другими задачами");
+		}
 		int id = task.getId();
 		final Task savedTask = tasks.get(id);
 		if (id == 0 || savedTask != null) {
@@ -113,6 +138,9 @@ public class InMemoryTaskManager implements TaskManager {
 
 	@Override
 	public Integer addNewSubtask(Subtask subtask) {
+		if (doesIntersectByTime(subtask)) {
+			throw new InvalidTaskCompletionTime("Подзадача пересекается по времени с другими задачами");
+		}
 		final int epicId = subtask.getEpicId();
 		Epic epic = epics.get(epicId);
 		if (epic == null) {
