@@ -2,6 +2,7 @@ package ru.yandex.javacourse.schedule.manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.javacourse.schedule.exceptions.InvalidTaskCompletionTime;
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.Task;
@@ -13,8 +14,7 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class InMemoryTaskManagerTest {
 
@@ -161,35 +161,15 @@ public class InMemoryTaskManagerTest {
 
         Task task = new Task(1, "Task 1", "Testing task 1", TaskStatus.NEW, duration, start);
         Epic epic = new Epic(2, "Epic 1", "Testing epic 1");
-        Subtask subtask = new Subtask(3, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 2, duration, start);
+        Subtask subtask = new Subtask(3, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 2, duration, start.plusYears(1));
 
         manager.addNewTask(task);
         manager.addNewEpic(epic);
         manager.addNewSubtask(subtask);
 
         assertEquals(end, task.getEndTime().get(), "Время завершения должно быть 01.01.2020 16:00");
-        assertEquals(end, subtask.getEndTime().get(), "Время завершения должно быть 01.01.2020 16:00");
-        assertEquals(end, epic.getEndTime().get(), "Время завершения должно быть 01.01.2020 16:00");
-    }
-
-    @Test
-    public void getEndTime_shouldNotRecalcEndTimeOfEpic_ifNewSubtaskHasSameTimeProperties() {
-        Duration duration = Duration.ofMinutes(60);
-
-        LocalDateTime start = LocalDateTime.of(2020, 1, 1, 15, 0, 0);
-        LocalDateTime end = start.plus(duration);
-
-        Epic epic = new Epic(2, "Epic 1", "Testing epic 1");
-        Subtask subtask1 = new Subtask(3, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 2, duration, start);
-        Subtask subtask2 = new Subtask(4, "Sub 2", "Testing subtask 2", TaskStatus.NEW, 2, duration, start);
-
-        manager.addNewEpic(epic);
-        manager.addNewSubtask(subtask1);
-        manager.addNewSubtask(subtask2);
-
-        assertEquals(end, subtask1.getEndTime().get(), "Время завершения должно быть 01.01.2020 16:00");
-        assertEquals(end, subtask2.getEndTime().get(), "Время завершения должно быть 01.01.2020 16:00");
-        assertEquals(end, epic.getEndTime().get(), "Время завершения должно быть 01.01.2020 16:00");
+        assertEquals(end.plusYears(1), subtask.getEndTime().get(), "Время завершения должно быть 01.01.2020 16:00");
+        assertEquals(end.plusYears(1), epic.getEndTime().get(), "Время завершения должно быть 01.01.2020 16:00");
     }
 
     @Test
@@ -244,5 +224,43 @@ public class InMemoryTaskManagerTest {
 
         assertEquals(start1, epic.getStartTime().get(), "Время начала эпика должно быть 01.01.2020 15:00");
         assertEquals(end2, epic.getEndTime().get(), "Время завершения эпика должно быть 01.01.2021 16:00");
+    }
+
+    @Test
+    public void addNewTask_shouldThrowException_ifTasksIntersectByTime() {
+        LocalDateTime start = LocalDateTime.of(2020, 1, 1, 15, 0, 0);
+        Duration duration = Duration.ofMinutes(60);
+        LocalDateTime end = start.plus(duration);
+
+        Task task1 = new Task(1, "Task 1", "Testing task 1", TaskStatus.NEW, duration, start);
+        Task task2 = new Task(2, "Task 2", "Testing task 2", TaskStatus.DONE, duration, start.minusMinutes(30));
+
+        manager.addNewTask(task1);
+
+        InvalidTaskCompletionTime exception = assertThrows(
+                InvalidTaskCompletionTime.class,
+                () -> manager.addNewTask(task2)
+        );
+        assertEquals("Задача пересекается по времени с другими задачами", exception.getMessage());
+    }
+
+    @Test
+    public void addNewSubtask_shouldThrowException_ifTasksIntersectByTime() {
+        LocalDateTime start = LocalDateTime.of(2020, 1, 1, 15, 0, 0);
+        Duration duration = Duration.ofMinutes(60);
+        LocalDateTime end = start.plus(duration);
+
+        Epic epic = new Epic(2, "Epic 1", "Testing epic 1");
+        Subtask subtask1 = new Subtask(3, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 2, duration, start);
+        Subtask subtask2 = new Subtask(4, "Sub 2", "Testing subtask 2", TaskStatus.NEW, 2, duration, start.minusMinutes(30));
+
+        manager.addNewEpic(epic);
+        manager.addNewTask(subtask1);
+
+        InvalidTaskCompletionTime exception = assertThrows(
+                InvalidTaskCompletionTime.class,
+                () -> manager.addNewSubtask(subtask2)
+        );
+        assertEquals("Подзадача пересекается по времени с другими задачами", exception.getMessage());
     }
 }
