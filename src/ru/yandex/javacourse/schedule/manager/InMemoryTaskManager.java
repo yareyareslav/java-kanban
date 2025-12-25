@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import ru.yandex.javacourse.schedule.exceptions.EpicDoesNotExist;
 import ru.yandex.javacourse.schedule.exceptions.InvalidTaskCompletionTime;
 import ru.yandex.javacourse.schedule.tasks.*;
 
@@ -153,7 +154,7 @@ public class InMemoryTaskManager implements TaskManager {
 		final int epicId = subtask.getEpicId();
 		Epic epic = epics.get(epicId);
 		if (epic == null) {
-			return null;
+			throw new EpicDoesNotExist("Эпик с таким id не найден");
 		}
 		int id = subtask.getId();
 		final Subtask savedSubtask = subtasks.get(id);
@@ -177,12 +178,14 @@ public class InMemoryTaskManager implements TaskManager {
 			return;
 		}
 		tasks.put(id, task);
-		prioritizedTasks.add(task);
 	}
 
 	@Override
 	public void updateEpic(Epic epic) {
 		final Epic savedEpic = epics.get(epic.getId());
+		if (savedEpic == null) {
+			return;
+		}
 		savedEpic.setName(epic.getName());
 		savedEpic.setDescription(epic.getDescription());
 	}
@@ -213,6 +216,9 @@ public class InMemoryTaskManager implements TaskManager {
 
 	@Override
 	public void deleteEpic(int id) {
+		if (epics.get(id) == null) {
+			return;
+		}
 		final Epic epic = epics.remove(id);
 		historyManager.remove(id);
 

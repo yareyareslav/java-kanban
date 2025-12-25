@@ -14,19 +14,20 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
+public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     private File file;
 
-    @BeforeEach
-    public void initManager() {
+    @Override
+    protected FileBackedTaskManager createTaskManager() {
         try {
             file = File.createTempFile("autosave", ".txt");
             file.deleteOnExit();
-            manager = FileBackedTaskManager.loadFromFile(file);
+            return FileBackedTaskManager.loadFromFile(file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
 
     @Test
     public void addEntities_shouldPersistAllToFile() throws IOException {
@@ -161,9 +162,27 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
         assertEquals(2, newManager.getEpic(epic.getId()).get().getSubtaskIds().size(), "В эпике должно быть 2 подзадачи");
     }
 
+    private void getEndTimeTemplate() {
+        LocalDateTime start = LocalDateTime.of(2020, 1, 1, 15, 0, 0);
+        Duration duration = Duration.ofMinutes(60);
+        LocalDateTime end = start.plus(duration);
+
+        Task task = new Task(1, "Task 1", "Testing task 1", TaskStatus.NEW, duration, start);
+        Epic epic = new Epic(2, "Epic 1", "Testing epic 1");
+        Subtask subtask = new Subtask(3, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 2, duration, start.plusYears(1));
+
+        manager.addNewTask(task);
+        manager.addNewEpic(epic);
+        manager.addNewSubtask(subtask);
+
+        assertEquals(end, task.getEndTime().get(), "Время завершения должно быть 01.01.2020 16:00");
+        assertEquals(end.plusYears(1), subtask.getEndTime().get(), "Время завершения должно быть 01.01.2020 16:00");
+        assertEquals(end.plusYears(1), epic.getEndTime().get(), "Время завершения должно быть 01.01.2020 16:00");
+    }
+
     @Test
     public void loadFromFile_shouldRestoreTasksWithTime() {
-        super.getEndTime_shouldCalcEndTime_ifStartTimeAndDurationAreProvided();
+        getEndTimeTemplate();
 
         TaskManager newManager = Managers.getFileBacked(file);
         Task task = newManager.getTask(1).get();
@@ -177,7 +196,7 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
 
     @Test
     public void getEndTime_shouldRestoreTasksWithTime() {
-        super.getEndTime_shouldCalcEndTime_ifStartTimeAndDurationAreProvided();
+        getEndTimeTemplate();
 
         TaskManager newManager = Managers.getFileBacked(file);
         Task task = newManager.getTask(1).get();
@@ -188,4 +207,6 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
         assertEquals(manager.getEpic(2).get().getEndTime().get(), epic.getEndTime().get(), "Эпик должен заканчиваться в то же время");
         assertEquals(manager.getSubtask(3).get().getEndTime().get(), subtask.getEndTime().get(), "Подзадача должна заканчиваться в то же время");
     }
+
+
 }
