@@ -31,13 +31,13 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
     @Test
     public void addEntities_shouldPersistAllToFile() throws IOException {
-        Task task = new Task("Task 1", "Desc 1", TaskStatus.NEW);
+        Task task = new Task("Task 1", "Desc 1", TaskStatus.NEW, null, null);
         Epic epic = new Epic("Epic 1", "Desc epic");
 
         manager.addNewTask(task);
         manager.addNewEpic(epic);
 
-        Subtask subtask = new Subtask("Subtask 1", "Desc sub", TaskStatus.IN_PROGRESS, epic.getId());
+        Subtask subtask = new Subtask("Subtask 1", "Desc sub", TaskStatus.IN_PROGRESS, epic.getId(), null, null);
         manager.addNewSubtask(subtask);
 
         List<String> lines = Files.readAllLines(file.toPath());
@@ -80,8 +80,8 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
     @Test
     public void deleteTask_task1ShouldNotBeInNewManager() throws IOException {
-        Task task1 = new Task(1,"Task 1", "Desc 1", TaskStatus.NEW);
-        Task task2 = new Task(2, "Task 2", "Desc 2", TaskStatus.NEW);
+        Task task1 = new Task(1,"Task 1", "Desc 1", TaskStatus.NEW, null, null);
+        Task task2 = new Task(2, "Task 2", "Desc 2", TaskStatus.NEW, null, null);
 
         manager.addNewTask(task1);
         manager.addNewTask(task2);
@@ -102,9 +102,9 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
     @Test
     public void deleteTask_changesShouldBeInTheNewManager() throws IOException {
-        Task task = new Task(1,"Task", "Desc Task", TaskStatus.NEW);
+        Task task = new Task(1,"Task", "Desc Task", TaskStatus.NEW, null, null);
         Epic epic = new Epic(3, "Epic", "Desc Epic");
-        Subtask subtask = new Subtask(2, "Subtask", "Desc Subtask", TaskStatus.NEW, 3);
+        Subtask subtask = new Subtask(2, "Subtask", "Desc Subtask", TaskStatus.NEW, 3, null, null);
 
 
         manager.addNewTask(task);
@@ -133,12 +133,12 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
     @Test
     public void loadFromFile_taskIdsShouldBeDifferent_addTaskWithExistingId() {
-        Task task1 = new Task(1,"Task 1", "Desc Task", TaskStatus.NEW);
+        Task task1 = new Task(1,"Task 1", "Desc Task", TaskStatus.NEW, null, null);
 
         manager.addNewTask(task1);
 
         TaskManager newManager = Managers.getFileBacked(file);
-        Task task2 = new Task(1,"Task 2", "Desc Task", TaskStatus.NEW);
+        Task task2 = new Task(1,"Task 2", "Desc Task", TaskStatus.NEW, null, null);
         newManager.addNewTask(task2);
 
         assertEquals(1, manager.getTasks().size(), "В старом менеджере должна быть 1 задача");
@@ -150,8 +150,8 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
     @Test
     public void loadFromFile_epicsShouldHaveSubtasks() {
         Epic epic = new Epic(1, "Epic", "Desc Epic");
-        Subtask subtask1 = new Subtask(2,"Task 1", "Desc Task", TaskStatus.NEW, 1);
-        Subtask subtask2 = new Subtask(2,"Task 2", "Desc Task", TaskStatus.NEW, 1);
+        Subtask subtask1 = new Subtask(2,"Task 1", "Desc Task", TaskStatus.NEW, 1, null, null);
+        Subtask subtask2 = new Subtask(2,"Task 2", "Desc Task", TaskStatus.NEW, 1, null, null);
 
         manager.addNewEpic(epic);
         manager.addNewSubtask(subtask1);

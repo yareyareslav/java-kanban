@@ -9,27 +9,13 @@ public class Subtask extends Task {
 	protected int epicId;
 	private final TaskType type = TaskType.SUBTASK;
 
-	public Subtask(int id, String name, String description, TaskStatus status, int epicId) {
-		super(id, name, description, status);
-		if (epicId == id) throw new InvalidEpicIdException("EpicID should not be equal to subtaskID");
-		this.epicId = epicId;
-	}
-
-	public Subtask(String name, String description, TaskStatus status, int epicId) {
-		super(name, description, status);
-		if (epicId == id) throw new InvalidEpicIdException("EpicID should not be equal to subtaskID");
-		this.epicId = epicId;
-	}
-
 	public Subtask(int id, String name, String description, TaskStatus status, int epicId, Duration duration, LocalDateTime startTime) {
 		super(id, name, description, status, duration, startTime);
-		if (epicId == id) throw new InvalidEpicIdException("EpicID should not be equal to subtaskID");
 		this.epicId = epicId;
 	}
 
 	public Subtask(String name, String description, TaskStatus status, int epicId, Duration duration, LocalDateTime startTime) {
 		super(name, description, status, duration, startTime);
-		if (epicId == id) throw new InvalidEpicIdException("EpicID should not be equal to subtaskID");
 		this.epicId = epicId;
 	}
 

@@ -12,13 +12,13 @@ public class Epic extends Task {
 	public static final TaskType type = TaskType.EPIC;
 
 	public Epic(int id, String name, String description) {
-		super(id, name, description, NEW);
+		super(id, name, description, NEW, null, null);
 		this.startTime = null;
 		this.duration = null;
 	}
 
 	public Epic(String name, String description) {
-		super(name, description, NEW);
+		super(name, description, NEW, null, null);
 		this.startTime = null;
 		this.duration = null;
 	}

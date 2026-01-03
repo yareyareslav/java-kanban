@@ -16,7 +16,7 @@ public class Main {
 		System.out.println("--- EXTRA TASK ---");
 		InMemoryTaskManager extraTM = Managers.getDefault();
 
-		Task extraTask1 = new Task("Task #1", "Task1 description", NEW);
+		Task extraTask1 = new Task("Task #1", "Task1 description", NEW, null, null);
 		Task extraTask2 = new Task("Task #2", "Task2 description", NEW, Duration.ofMinutes(50), LocalDateTime.of(2017, 12, 30, 12, 50));
 		extraTM.addNewTask(extraTask1);
 		extraTM.addNewTask(extraTask2);
@@ -43,8 +43,8 @@ public class Main {
 		System.out.println("--- EXTRA TASK ---");
 		TaskManager extraTM = Managers.getDefault();
 
-		Task extraTask1 = new Task("Task #1", "Task1 description", NEW);
-		Task extraTask2 = new Task("Task #2", "Task2 description", NEW);
+		Task extraTask1 = new Task("Task #1", "Task1 description", NEW, null, null);
+		Task extraTask2 = new Task("Task #2", "Task2 description", NEW, null, null);
 		extraTM.addNewTask(extraTask1);
 		extraTM.addNewTask(extraTask2);
 
@@ -54,9 +54,9 @@ public class Main {
 		extraTM.addNewEpic(extraEpic2);
 
 		int extraEpic1Id = extraEpic1.getId();
-		Subtask extraSubtask1 = new Subtask("Subtask #1-1", "Subtask1 description", NEW, extraEpic1Id);
-		Subtask extraSubtask2 = new Subtask("Subtask #2-1", "Subtask1 description", NEW, extraEpic1Id);
-		Subtask extraSubtask3 = new Subtask("Subtask #3-1", "Subtask1 description", DONE, extraEpic1Id);
+		Subtask extraSubtask1 = new Subtask("Subtask #1-1", "Subtask1 description", NEW, extraEpic1Id, null, null);
+		Subtask extraSubtask2 = new Subtask("Subtask #2-1", "Subtask1 description", NEW, extraEpic1Id, null, null);
+		Subtask extraSubtask3 = new Subtask("Subtask #3-1", "Subtask1 description", DONE, extraEpic1Id, null, null);
 		extraTM.addNewSubtask(extraSubtask1);
 		extraTM.addNewSubtask(extraSubtask2);
 		extraTM.addNewSubtask(extraSubtask3);

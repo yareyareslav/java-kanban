@@ -2,7 +2,7 @@ package ru.yandex.javacourse.schedule.manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.javacourse.schedule.exceptions.EpicDoesNotExist;
+import ru.yandex.javacourse.schedule.exceptions.NotFoundException;
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.Task;
@@ -26,8 +26,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void getTasks_shouldReturnListOfTasks() {
-        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW);
+        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW, null, null);
+        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW, null, null);
 
         manager.addNewTask(task1);
         manager.addNewTask(task2);
@@ -41,8 +41,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic(3, "Test 1", "Testing epic for subtasks");
         manager.addNewEpic(epic);
 
-        Subtask subtask1 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, epic.getId());
-        Subtask subtask2 = new Subtask(2, "Test 2", "Testing subtask 2", TaskStatus.NEW, epic.getId());
+        Subtask subtask1 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, epic.getId(), null, null);
+        Subtask subtask2 = new Subtask(2, "Test 2", "Testing subtask 2", TaskStatus.NEW, epic.getId(), null, null);
         manager.addNewSubtask(subtask1);
         manager.addNewSubtask(subtask2);
 
@@ -67,8 +67,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic(3, "Test 1", "Testing epic for subtasks");
         manager.addNewEpic(epic);
 
-        Subtask subtask1 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, epic.getId());
-        Subtask subtask2 = new Subtask(2, "Test 2", "Testing subtask 2", TaskStatus.NEW, epic.getId());
+        Subtask subtask1 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, epic.getId(), null, null);
+        Subtask subtask2 = new Subtask(2, "Test 2", "Testing subtask 2", TaskStatus.NEW, epic.getId(), null, null);
         manager.addNewSubtask(subtask1);
         manager.addNewSubtask(subtask2);
 
@@ -78,7 +78,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void getTask_shouldReturnTask_taskWithIdExists() {
-        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
+        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW, null, null);
 
         manager.addNewTask(task1);
 
@@ -87,7 +87,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void getTask_shouldReturnEmpty_taskWithIdDoesNotExist() {
-        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
+        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW, null, null);
 
         manager.addNewTask(task1);
 
@@ -99,7 +99,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic(3, "Test 1", "Testing epic for subtasks");
         manager.addNewEpic(epic);
 
-        Subtask subtask1 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, epic.getId());
+        Subtask subtask1 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, epic.getId(), null, null);
 
         manager.addNewTask(subtask1);
 
@@ -111,7 +111,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic(3, "Test 1", "Testing epic for subtasks");
         manager.addNewEpic(epic);
 
-        Subtask subtask1 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, epic.getId());
+        Subtask subtask1 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, epic.getId(), null, null);
 
         manager.addNewTask(subtask1);
 
@@ -138,7 +138,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void addNewTask_shouldAddNewTaskToManager() {
-        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
+        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW, null, null);
 
         int id = manager.addNewTask(task1);
 
@@ -147,8 +147,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void addNewTask_shouldAssignIdToTask2_taskIdMissing(){
-        Task task1 = new Task(2, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task2 = new Task("Test 2", "Testing task 2", TaskStatus.NEW);
+        Task task1 = new Task(2, "Test 1", "Testing task 1", TaskStatus.NEW, null, null);
+        Task task2 = new Task("Test 2", "Testing task 2", TaskStatus.NEW, null, null);
         manager.addNewTask(task1);
         manager.addNewTask(task2);
         assertEquals(2, manager.getTasks().size(), "the same size of tasks in manager");
@@ -158,8 +158,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void addNewTask_shouldRewriteIdOfTask2_tasksHaveSameIds() {
-        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task2 = new Task(1, "Test 2", "Testing task 2", TaskStatus.NEW);
+        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW, null, null);
+        Task task2 = new Task(1, "Test 2", "Testing task 2", TaskStatus.NEW, null, null);
 
         manager.addNewTask(task1);
         int id = manager.addNewTask(task2);
@@ -172,7 +172,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic(3, "Test 1", "Testing epic for subtasks");
         manager.addNewEpic(epic);
 
-        Subtask subtask1 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, epic.getId());
+        Subtask subtask1 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, epic.getId(), null, null);
         int id = manager.addNewSubtask(subtask1);
 
         assertSame(subtask1, manager.getSubtask(id).get(), "Подзадача должна быть в менеджере");
@@ -183,8 +183,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic(3, "Test 1", "Testing epic for subtasks");
         manager.addNewEpic(epic);
 
-        Subtask subtask1 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, epic.getId());
-        Subtask subtask2 = new Subtask(1, "Test 2", "Testing subtask 2", TaskStatus.NEW, epic.getId());
+        Subtask subtask1 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, epic.getId(), null, null);
+        Subtask subtask2 = new Subtask(1, "Test 2", "Testing subtask 2", TaskStatus.NEW, epic.getId(), null, null);
         manager.addNewSubtask(subtask1);
         int id = manager.addNewSubtask(subtask2);
 
@@ -192,10 +192,20 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    public void addNewSubtask_shouldThrow_epicDoesNotExist() {
-        Subtask subtask1 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, 1000);
+    public void addNewSubtask_shouldChangeSubtaskId_idEqualsToEpicId() {
+        Epic epic = new Epic(1, "Test 1", "Testing epic for subtasks");
+        Subtask subtask = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, 1, null, null);
+        manager.addNewEpic(epic);
+        manager.addNewSubtask(subtask);
 
-        assertThrows(EpicDoesNotExist.class, () -> manager.addNewSubtask(subtask1));
+        assertNotEquals(epic.getId(), subtask.getId(), "Subtask id should not be equal to epicId");
+    }
+
+    @Test
+    public void addNewSubtask_shouldThrow_epicDoesNotExist() {
+        Subtask subtask1 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, 1000, null, null);
+
+        assertThrows(NotFoundException.class, () -> manager.addNewSubtask(subtask1));
     }
 
     @Test
@@ -218,8 +228,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     
     @Test
     public void updateTask_shouldUpdateTask_taskWithIdExists() {
-        Task taskOld = new Task(1, "Test Old", "Testing task Old", TaskStatus.NEW);
-        Task taskNew = new Task(1, "Test New", "Testing task New", TaskStatus.NEW);
+        Task taskOld = new Task(1, "Test Old", "Testing task Old", TaskStatus.NEW, null, null);
+        Task taskNew = new Task(1, "Test New", "Testing task New", TaskStatus.NEW, null, null);
 
         manager.addNewTask(taskOld);
         assertSame(taskOld, manager.getTask(taskOld.getId()).get(), "Задача должна добавиться");
@@ -230,16 +240,14 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    public void updateTask_shouldNotUpdateTask_taskWithIdDoesNotExist() {
-        Task taskOld = new Task(1, "Test Old", "Testing task Old", TaskStatus.NEW);
-        Task taskNew = new Task(2, "Test New", "Testing task New", TaskStatus.NEW);
+    public void updateTask_shouldThrowNotFoundException_taskWithIdDoesNotExist() {
+        Task taskOld = new Task(1, "Test Old", "Testing task Old", TaskStatus.NEW, null, null);
+        Task taskNew = new Task(2, "Test New", "Testing task New", TaskStatus.NEW, null, null);
 
         manager.addNewTask(taskOld);
         assertSame(taskOld, manager.getTask(taskOld.getId()).get(), "Задача должна добавиться");
 
-        manager.updateTask(taskNew);
-        assertSame(taskOld, manager.getTask(taskOld.getId()).get(), "Задача должна остаться прежней");
-        assertEquals(Optional.empty(), manager.getTask(taskNew.getId()), "Новой версии не должно быть в менеджере");
+        assertThrows(NotFoundException.class, () -> manager.updateTask(taskNew));
     }
 
     @Test
@@ -257,17 +265,14 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    public void updateEpic_shouldNotUpdateEpic_epicWithIdDoesNotExist() {
+    public void updateEpic_shouldThrowNotFoundException_epicWithIdDoesNotExist() {
         Epic epicOld = new Epic(1, "Test Old", "Testing epic Old");
         Epic epicNew = new Epic(2, "Test New", "Testing epic New");
 
         manager.addNewEpic(epicOld);
         assertSame(epicOld, manager.getEpic(epicOld.getId()).get(), "Эпик должен добавиться");
 
-        manager.updateEpic(epicNew);
-        assertNotEquals(epicOld.getName(), epicNew.getName(), "Имя эпика должно остаться прежним");
-        assertNotEquals(epicOld.getDescription(), epicNew.getDescription(), "Описание эпика должно остаться прежним");
-        assertSame(epicOld, manager.getEpic(epicOld.getId()).get(), "Эпик должен остаться тем же объектом в менеджере");
+        assertThrows(NotFoundException.class, () -> manager.updateEpic(epicNew));
     }
 
     @Test
@@ -275,8 +280,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic(3, "Test 1", "Testing epic for subtasks");
         manager.addNewEpic(epic);
 
-        Subtask subtaskOld = new Subtask(1, "Test Old", "Testing subtask Old", TaskStatus.NEW, 3);
-        Subtask subtaskNew = new Subtask(1, "Test New", "Testing subtask New", TaskStatus.NEW, 3);
+        Subtask subtaskOld = new Subtask(1, "Test Old", "Testing subtask Old", TaskStatus.NEW, 3, null, null);
+        Subtask subtaskNew = new Subtask(1, "Test New", "Testing subtask New", TaskStatus.NEW, 3, null, null);
 
         manager.addNewSubtask(subtaskOld);
         assertSame(subtaskOld, manager.getSubtask(subtaskOld.getId()).get(), "Подзадача должна добавиться");
@@ -286,38 +291,36 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    public void updateSubtask_shouldNotUpdateSubtask_subtaskWithIdDoesNotExist() {
+    public void updateSubtask_shouldThrowNotFoundException_subtaskWithIdDoesNotExist() {
         Epic epic = new Epic(3, "Test 1", "Testing epic for subtasks");
         manager.addNewEpic(epic);
 
-        Subtask subtaskOld = new Subtask(1, "Test Old", "Testing subtask Old", TaskStatus.NEW, 3);
-        Subtask subtaskNew = new Subtask(2, "Test New", "Testing subtask New", TaskStatus.NEW, 3);
+        Subtask subtaskOld = new Subtask(1, "Test Old", "Testing subtask Old", TaskStatus.NEW, 3, null, null);
+        Subtask subtaskNew = new Subtask(2, "Test New", "Testing subtask New", TaskStatus.NEW, 3, null, null);
 
         manager.addNewSubtask(subtaskOld);
         assertSame(subtaskOld, manager.getSubtask(subtaskOld.getId()).get(), "Подзадача должна добавиться");
 
-        manager.updateSubtask(subtaskNew);
-        assertSame(subtaskOld, manager.getSubtask(subtaskOld.getId()).get(), "Подзадача должна остаться прежней");
+        assertThrows(NotFoundException.class, () -> manager.updateSubtask(subtaskNew));
     }
 
     @Test
-    public void updateSubtask_shouldNotUpdateSubtask_epicWithIdDoesNotExist() {
+    public void updateSubtask_shouldThrowNotFoundException_epicWithIdDoesNotExist() {
         Epic epic = new Epic(3, "Test 1", "Testing epic for subtasks");
         manager.addNewEpic(epic);
 
-        Subtask subtaskOld = new Subtask(1, "Test Old", "Testing subtask Old", TaskStatus.NEW, 3);
-        Subtask subtaskNew = new Subtask(1, "Test New", "Testing subtask New", TaskStatus.NEW, 4);
+        Subtask subtaskOld = new Subtask(1, "Test Old", "Testing subtask Old", TaskStatus.NEW, 3, null, null);
+        Subtask subtaskNew = new Subtask(1, "Test New", "Testing subtask New", TaskStatus.NEW, 4, null, null);
 
         manager.addNewSubtask(subtaskOld);
         assertSame(subtaskOld, manager.getSubtask(subtaskOld.getId()).get(), "Подзадача должна добавиться");
 
-        manager.updateSubtask(subtaskNew);
-        assertSame(subtaskOld, manager.getSubtask(subtaskOld.getId()).get(), "Подзадача должна остаться прежней");
+        assertThrows(NotFoundException.class, () -> manager.updateSubtask(subtaskNew));
     }
 
     @Test
     public void deleteTask_shouldDeleteTask_taskExists() {
-        Task task = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
+        Task task = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW, null, null);
         int id = manager.addNewTask(task);
 
         assertSame(task, manager.getTask(id).get(), "Задача должна добавиться в менеджер");
@@ -328,7 +331,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void deleteTask_shouldNotDeleteTask_taskDoesNotExist() {
-        Task task = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
+        Task task = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW, null, null);
         int id = manager.addNewTask(task);
 
         assertSame(task, manager.getTask(id).get(), "Задача должна добавиться в менеджер");
@@ -342,8 +345,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic(1, "Epic 1", "Testing task 1");
         int id = manager.addNewEpic(epic);
 
-        Subtask subtask1 = new Subtask(2, "Test 1", "Testing subtask 1", TaskStatus.NEW, id);
-        Subtask subtask2 = new Subtask(3, "Test 2", "Testing subtask 2", TaskStatus.NEW, id);
+        Subtask subtask1 = new Subtask(2, "Test 1", "Testing subtask 1", TaskStatus.NEW, id, null, null);
+        Subtask subtask2 = new Subtask(3, "Test 2", "Testing subtask 2", TaskStatus.NEW, id, null, null);
         manager.addNewSubtask(subtask1);
         manager.addNewSubtask(subtask2);
 
@@ -360,8 +363,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic(1, "Epic 1", "Testing task 1");
         int id = manager.addNewEpic(epic);
 
-        Subtask subtask1 = new Subtask(2, "Test 1", "Testing subtask 1", TaskStatus.NEW, id);
-        Subtask subtask2 = new Subtask(3, "Test 2", "Testing subtask 2", TaskStatus.NEW, id);
+        Subtask subtask1 = new Subtask(2, "Test 1", "Testing subtask 1", TaskStatus.NEW, id, null, null);
+        Subtask subtask2 = new Subtask(3, "Test 2", "Testing subtask 2", TaskStatus.NEW, id, null, null);
         manager.addNewSubtask(subtask1);
         manager.addNewSubtask(subtask2);
 
@@ -377,8 +380,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic(1, "Epic 1", "Testing task 1");
         int epicId = manager.addNewEpic(epic);
 
-        Subtask subtask1 = new Subtask(2, "Test 1", "Testing subtask 1", TaskStatus.NEW, epicId);
-        Subtask subtask2 = new Subtask(3, "Test 2", "Testing subtask 2", TaskStatus.NEW, epicId);
+        Subtask subtask1 = new Subtask(2, "Test 1", "Testing subtask 1", TaskStatus.NEW, epicId, null, null);
+        Subtask subtask2 = new Subtask(3, "Test 2", "Testing subtask 2", TaskStatus.NEW, epicId, null, null);
         manager.addNewSubtask(subtask1);
         int id = manager.addNewSubtask(subtask2);
 
@@ -395,8 +398,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic(1, "Epic 1", "Testing task 1");
         int epicId = manager.addNewEpic(epic);
 
-        Subtask subtask1 = new Subtask(2, "Test 1", "Testing subtask 1", TaskStatus.NEW, epicId);
-        Subtask subtask2 = new Subtask(3, "Test 2", "Testing subtask 2", TaskStatus.NEW, epicId);
+        Subtask subtask1 = new Subtask(2, "Test 1", "Testing subtask 1", TaskStatus.NEW, epicId, null, null);
+        Subtask subtask2 = new Subtask(3, "Test 2", "Testing subtask 2", TaskStatus.NEW, epicId, null, null);
         manager.addNewSubtask(subtask1);
         manager.addNewSubtask(subtask2);
 
@@ -410,8 +413,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void deleteTasks_shouldDeleteAllTasks() {
-        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW);
+        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW, null, null);
+        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW, null, null);
 
         manager.addNewTask(task1);
         manager.addNewTask(task2);
@@ -428,8 +431,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic(3, "Test 1", "Testing epic for subtasks");
         manager.addNewEpic(epic);
 
-        Subtask subtask1 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, epic.getId());
-        Subtask subtask2 = new Subtask(2, "Test 2", "Testing subtask 2", TaskStatus.NEW, epic.getId());
+        Subtask subtask1 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, epic.getId(), null, null);
+        Subtask subtask2 = new Subtask(2, "Test 2", "Testing subtask 2", TaskStatus.NEW, epic.getId(), null, null);
         manager.addNewSubtask(subtask1);
         manager.addNewSubtask(subtask2);
 
@@ -446,8 +449,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic2 = new Epic(2, "Test 2", "Testing epic2");
         manager.addNewEpic(epic1);
         manager.addNewEpic(epic2);
-        Subtask subtask1 = new Subtask(3, "Test 1", "Testing subtask 1", TaskStatus.NEW, epic1.getId());
-        Subtask subtask2 = new Subtask(4, "Test 2", "Testing subtask 2", TaskStatus.NEW, epic1.getId());
+        Subtask subtask1 = new Subtask(3, "Test 1", "Testing subtask 1", TaskStatus.NEW, epic1.getId(), null, null);
+        Subtask subtask2 = new Subtask(4, "Test 2", "Testing subtask 2", TaskStatus.NEW, epic1.getId(), null, null);
         manager.addNewSubtask(subtask1);
         manager.addNewSubtask(subtask2);
 
@@ -461,9 +464,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     public void getHistory_shouldReturnViewsHistory() {
-        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW);
-        Task task3 = new Task(3, "Test 3", "Testing task 3", TaskStatus.NEW);
+        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW, null, null);
+        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW, null, null);
+        Task task3 = new Task(3, "Test 3", "Testing task 3", TaskStatus.NEW, null, null);
 
         int id1 = manager.addNewTask(task1);
         int id2 = manager.addNewTask(task2);

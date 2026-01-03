@@ -21,7 +21,7 @@ public class InMemoryHistoryManagerTest {
 
     @Test
     public void testHistoricVersions(){
-        Task task = new Task("Test 1", "Testing task 1", TaskStatus.NEW);
+        Task task = new Task("Test 1", "Testing task 1", TaskStatus.NEW, null, null);
         historyManager.add(task);
         assertEquals(1, historyManager.getTasks().size(), "historic task should be added");
         task.setStatus(TaskStatus.IN_PROGRESS);
@@ -31,16 +31,16 @@ public class InMemoryHistoryManagerTest {
 
     @Test
     public void testHistoricVersionsByPointer(){
-        Task task = new Task("Test 1", "Testing task 1", TaskStatus.NEW);
+        Task task = new Task("Test 1", "Testing task 1", TaskStatus.NEW, null, null);
         historyManager.add(task);
         assertEquals(task.getStatus(), historyManager.getTasks().getFirst().getStatus(), "historic task should be stored");
     }
 
     @Test
     public void remove_nodeShouldBeDeletedByItsIDFromStart() {
-        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW);
-        Task task3 = new Task(3, "Test 3", "Testing task 3", TaskStatus.NEW);
+        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW, null, null);
+        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW, null, null);
+        Task task3 = new Task(3, "Test 3", "Testing task 3", TaskStatus.NEW, null, null);
         historyManager.add(task1);
         historyManager.add(task2);
         historyManager.add(task3);
@@ -53,9 +53,9 @@ public class InMemoryHistoryManagerTest {
 
     @Test
     public void remove_nodeShouldBeDeletedByItsIDFromCenter() {
-        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW);
-        Task task3 = new Task(3, "Test 3", "Testing task 3", TaskStatus.NEW);
+        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW, null, null);
+        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW, null, null);
+        Task task3 = new Task(3, "Test 3", "Testing task 3", TaskStatus.NEW, null, null);
         historyManager.add(task1);
         historyManager.add(task2);
         historyManager.add(task3);
@@ -68,9 +68,9 @@ public class InMemoryHistoryManagerTest {
 
     @Test
     public void remove_nodeShouldBeDeletedByItsIDFromEnd() {
-        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW);
-        Task task3 = new Task(3, "Test 3", "Testing task 3", TaskStatus.NEW);
+        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW, null, null);
+        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW, null, null);
+        Task task3 = new Task(3, "Test 3", "Testing task 3", TaskStatus.NEW, null, null);
         historyManager.add(task1);
         historyManager.add(task2);
         historyManager.add(task3);
@@ -83,9 +83,9 @@ public class InMemoryHistoryManagerTest {
 
     @Test
     public void getTasks_shouldSaveOrder_ifAddTaskWithTheSameId() {
-        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW);
-        Task task3 = new Task(3, "Test 3", "Testing task 3", TaskStatus.NEW);
+        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW, null, null);
+        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW, null, null);
+        Task task3 = new Task(3, "Test 3", "Testing task 3", TaskStatus.NEW, null, null);
         historyManager.add(task3);
         historyManager.add(task1);
         historyManager.add(task2);
@@ -101,9 +101,9 @@ public class InMemoryHistoryManagerTest {
 
     @Test
     public void getTasks_shouldRemoveDuplicates_sameTaskIsCalledTwice() {
-        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW);
-        Task task3 = new Task(3, "Test 3", "Testing task 3", TaskStatus.NEW);
+        Task task1 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW, null, null);
+        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW, null, null);
+        Task task3 = new Task(3, "Test 3", "Testing task 3", TaskStatus.NEW, null, null);
         historyManager.add(task1);
         historyManager.add(task2);
         historyManager.add(task3);

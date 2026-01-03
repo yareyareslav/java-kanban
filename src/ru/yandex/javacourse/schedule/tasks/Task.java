@@ -14,34 +14,21 @@ public class Task {
 	protected Duration duration;
 	protected LocalDateTime startTime;
 
-	public Task(int id, String name, String description, TaskStatus status) {
-		this.id = id;
+	private void assignTaskProperties(String name, String description, TaskStatus status, Duration duration, LocalDateTime startTime) {
 		this.name = name;
 		this.description = description;
 		this.status = status;
-	}
-
-	public Task(String name, String description, TaskStatus status) {
-		this.name = name;
-		this.description = description;
-		this.status = status;
+		this.duration = duration;
+		this.startTime = startTime;
 	}
 
 	public Task(int id, String name, String description, TaskStatus status, Duration duration, LocalDateTime startTime) {
 		this.id = id;
-		this.name = name;
-		this.description = description;
-		this.status = status;
-		this.duration = duration;
-		this.startTime = startTime;
+		assignTaskProperties(name, description, status, duration, startTime);
 	}
 
 	public Task(String name, String description, TaskStatus status, Duration duration, LocalDateTime startTime) {
-		this.name = name;
-		this.description = description;
-		this.status = status;
-		this.duration = duration;
-		this.startTime = startTime;
+		assignTaskProperties(name, description, status, duration, startTime);
 	}
 
 	public int getId() {
@@ -81,11 +68,11 @@ public class Task {
 	}
 
 	public Optional<LocalDateTime> getStartTime() {
-		return startTime != null ? Optional.of(startTime) : Optional.empty();
+		return Optional.ofNullable(startTime);
 	}
 
 	public Optional<Duration> getDuration() {
-		return duration != null ? Optional.of(duration) : Optional.empty();
+		return Optional.ofNullable(duration);
 	}
 
 	public Optional<LocalDateTime> getEndTime() {

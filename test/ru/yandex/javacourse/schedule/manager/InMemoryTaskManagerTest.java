@@ -1,7 +1,7 @@
 package ru.yandex.javacourse.schedule.manager;
 
 import org.junit.jupiter.api.Test;
-import ru.yandex.javacourse.schedule.exceptions.InvalidTaskCompletionTime;
+import ru.yandex.javacourse.schedule.exceptions.TaskIntersectionException;
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.Task;
@@ -93,6 +93,24 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
     }
 
     @Test
+    public void getDuration_shouldBeEqualToSumOfEpicSubtasksDuration() {
+        Duration duration = Duration.ofMinutes(60);
+
+        LocalDateTime start1 = LocalDateTime.of(2020, 1, 1, 15, 0, 0);
+        LocalDateTime start2 = LocalDateTime.of(2019, 1, 1, 15, 0, 0);
+
+        Epic epic = new Epic(2, "Epic 1", "Testing epic 1");
+        Subtask subtask1 = new Subtask(3, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 2, duration, start1);
+        Subtask subtask2 = new Subtask(4, "Sub 2", "Testing subtask 2", TaskStatus.NEW, 2, duration, start2);
+
+        manager.addNewEpic(epic);
+        manager.addNewSubtask(subtask1);
+        manager.addNewSubtask(subtask2);
+
+        assertEquals(subtask1.getDuration().get().plus(subtask2.getDuration().get()), epic.getDuration().get(), "Duration should be 2 hours");
+    }
+
+    @Test
     public void addNewTask_shouldThrowException_ifTasksIntersectByTime() {
         LocalDateTime start = LocalDateTime.of(2020, 1, 1, 15, 0, 0);
         Duration duration = Duration.ofMinutes(60);
@@ -103,8 +121,8 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
 
         manager.addNewTask(task1);
 
-        InvalidTaskCompletionTime exception = assertThrows(
-                InvalidTaskCompletionTime.class,
+        TaskIntersectionException exception = assertThrows(
+                TaskIntersectionException.class,
                 () -> manager.addNewTask(task2)
         );
         assertEquals("Задача пересекается по времени с другими задачами", exception.getMessage());
@@ -122,8 +140,8 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
         manager.addNewEpic(epic);
         manager.addNewTask(subtask1);
 
-        InvalidTaskCompletionTime exception = assertThrows(
-                InvalidTaskCompletionTime.class,
+        TaskIntersectionException exception = assertThrows(
+                TaskIntersectionException.class,
                 () -> manager.addNewSubtask(subtask2)
         );
         assertEquals("Подзадача пересекается по времени с другими задачами", exception.getMessage());
@@ -132,8 +150,8 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
     @Test
     public void updateEpicStatus_shouldBeNew_allSubtasksNew() {
         Epic epic = new Epic(1, "Epic 1", "Testing epic 1");
-        Subtask subtask1 = new Subtask(2, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 1);
-        Subtask subtask2 = new Subtask(3, "Sub 2", "Testing subtask 2", TaskStatus.NEW, 1);
+        Subtask subtask1 = new Subtask(2, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 1, null, null);
+        Subtask subtask2 = new Subtask(3, "Sub 2", "Testing subtask 2", TaskStatus.NEW, 1, null, null);
 
         manager.addNewEpic(epic);
         manager.addNewSubtask(subtask1);
@@ -145,8 +163,8 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
     @Test
     public void updateEpicStatus_shouldBeDone_allSubtasksDone() {
         Epic epic = new Epic(1, "Epic 1", "Testing epic 1");
-        Subtask subtask1 = new Subtask(2, "Sub 1", "Testing subtask 1", TaskStatus.DONE, 1);
-        Subtask subtask2 = new Subtask(3, "Sub 2", "Testing subtask 2", TaskStatus.DONE, 1);
+        Subtask subtask1 = new Subtask(2, "Sub 1", "Testing subtask 1", TaskStatus.DONE, 1, null, null);
+        Subtask subtask2 = new Subtask(3, "Sub 2", "Testing subtask 2", TaskStatus.DONE, 1, null, null);
 
         manager.addNewEpic(epic);
         manager.addNewSubtask(subtask1);
@@ -158,8 +176,8 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
     @Test
     public void updateEpicStatus_shouldBeInProgress_oneSubtaskNewRestSubtasksDone() {
         Epic epic = new Epic(1, "Epic 1", "Testing epic 1");
-        Subtask subtask1 = new Subtask(2, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 1);
-        Subtask subtask2 = new Subtask(3, "Sub 2", "Testing subtask 2", TaskStatus.DONE, 1);
+        Subtask subtask1 = new Subtask(2, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 1, null, null);
+        Subtask subtask2 = new Subtask(3, "Sub 2", "Testing subtask 2", TaskStatus.DONE, 1, null, null);
 
         manager.addNewEpic(epic);
         manager.addNewSubtask(subtask1);
@@ -171,8 +189,8 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
     @Test
     public void updateEpicStatus_shouldBeInProgress_allInProgress() {
         Epic epic = new Epic(1, "Epic 1", "Testing epic 1");
-        Subtask subtask1 = new Subtask(2, "Sub 1", "Testing subtask 1", TaskStatus.IN_PROGRESS, 1);
-        Subtask subtask2 = new Subtask(3, "Sub 2", "Testing subtask 2", TaskStatus.IN_PROGRESS, 1);
+        Subtask subtask1 = new Subtask(2, "Sub 1", "Testing subtask 1", TaskStatus.IN_PROGRESS, 1, null, null);
+        Subtask subtask2 = new Subtask(3, "Sub 2", "Testing subtask 2", TaskStatus.IN_PROGRESS, 1, null, null);
 
         manager.addNewEpic(epic);
         manager.addNewSubtask(subtask1);
