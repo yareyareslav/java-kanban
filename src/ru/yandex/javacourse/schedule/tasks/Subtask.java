@@ -1,7 +1,5 @@
 package ru.yandex.javacourse.schedule.tasks;
 
-import ru.yandex.javacourse.schedule.exceptions.InvalidEpicIdException;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 
