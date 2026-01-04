@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import ru.yandex.javacourse.schedule.exceptions.NotFoundException;
-import ru.yandex.javacourse.schedule.exceptions.TaskIntersectionException;
+import ru.yandex.javacourse.schedule.exceptions.TimeIntersectionException;
 import ru.yandex.javacourse.schedule.tasks.*;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -53,6 +53,7 @@ public class InMemoryTaskManager implements TaskManager {
 		LocalDateTime endTime = maybeEnd.get();
 
         return prioritizedTasks.stream()
+				.filter(t -> t.getId() != task.getId())
                 .anyMatch(t -> {
 //					Можно без проверки, так как в prioritizedTasks попадают только задачи с временем выполнения
                     LocalDateTime curStart = t.getStartTime().get();
@@ -120,7 +121,7 @@ public class InMemoryTaskManager implements TaskManager {
 	@Override
 	public int addNewTask(Task task) {
 		if (doesIntersectByTime(task)) {
-			throw new TaskIntersectionException("Задача пересекается по времени с другими задачами");
+			throw new TimeIntersectionException("Задача пересекается по времени с другими задачами");
 		}
 		int id = task.getId();
 		final Task savedTask = tasks.get(id);
@@ -149,7 +150,7 @@ public class InMemoryTaskManager implements TaskManager {
 	@Override
 	public Integer addNewSubtask(Subtask subtask) {
 		if (doesIntersectByTime(subtask)) {
-			throw new TaskIntersectionException("Подзадача пересекается по времени с другими задачами");
+			throw new TimeIntersectionException("Подзадача пересекается по времени с другими задачами");
 		}
 		final int epicId = subtask.getEpicId();
 		Epic epic = epics.get(epicId);
@@ -172,6 +173,9 @@ public class InMemoryTaskManager implements TaskManager {
 
 	@Override
 	public void updateTask(Task task) {
+		if (doesIntersectByTime(task)) {
+			throw new TimeIntersectionException("Задача пересекается по времени с другими задачами");
+		}
 		final int id = task.getId();
 		final Task savedTask = tasks.get(id);
 		if (savedTask == null) {
@@ -192,6 +196,9 @@ public class InMemoryTaskManager implements TaskManager {
 
 	@Override
 	public void updateSubtask(Subtask subtask) {
+		if (doesIntersectByTime(subtask)) {
+			throw new TimeIntersectionException("Подзадача пересекается по времени с другими задачами");
+		}
 		final int id = subtask.getId();
 		final int epicId = subtask.getEpicId();
 		final Subtask savedSubtask = subtasks.get(id);

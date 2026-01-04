@@ -1,7 +1,7 @@
 package ru.yandex.javacourse.schedule.manager;
 
 import org.junit.jupiter.api.Test;
-import ru.yandex.javacourse.schedule.exceptions.TaskIntersectionException;
+import ru.yandex.javacourse.schedule.exceptions.TimeIntersectionException;
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.Task;
@@ -121,8 +121,8 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
 
         manager.addNewTask(task1);
 
-        TaskIntersectionException exception = assertThrows(
-                TaskIntersectionException.class,
+        TimeIntersectionException exception = assertThrows(
+                TimeIntersectionException.class,
                 () -> manager.addNewTask(task2)
         );
         assertEquals("Задача пересекается по времени с другими задачами", exception.getMessage());
@@ -140,8 +140,8 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
         manager.addNewEpic(epic);
         manager.addNewTask(subtask1);
 
-        TaskIntersectionException exception = assertThrows(
-                TaskIntersectionException.class,
+        TimeIntersectionException exception = assertThrows(
+                TimeIntersectionException.class,
                 () -> manager.addNewSubtask(subtask2)
         );
         assertEquals("Подзадача пересекается по времени с другими задачами", exception.getMessage());

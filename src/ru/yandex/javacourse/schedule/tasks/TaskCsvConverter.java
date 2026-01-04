@@ -19,18 +19,13 @@ public class TaskCsvConverter {
         String name = task.getName();
         TaskStatus status = task.getStatus();
         String description = task.getDescription();
-        Optional<Duration> maybeDuration = task.getDuration();
-        Optional<LocalDateTime> maybeStart = task.getStartTime();
-
-        String duration = null;
-        String start = null;
-
-        if (maybeDuration.isPresent()) {
-            duration = Long.toString(maybeDuration.get().toMinutes());
-        }
-        if (maybeStart.isPresent()) {
-            start = maybeStart.get().format(DATE_FORMATTER);
-        }
+        String duration = task.getDuration()
+                .map(Duration::toMinutes)
+                .map(d -> Long.toString(d))
+                .orElse(null);
+        String start = task.getStartTime()
+                .map(t -> t.format(DATE_FORMATTER))
+                .orElse(null);
 
         return String.format(
                 FORMAT,
@@ -51,18 +46,13 @@ public class TaskCsvConverter {
         TaskStatus status = subtask.getStatus();
         String description = subtask.getDescription();
         String epicId = Integer.toString(subtask.getEpicId());
-        Optional<Duration> maybeDuration = subtask.getDuration();
-        Optional<LocalDateTime> maybeStart = subtask.getStartTime();
-
-        String duration = null;
-        String start = null;
-
-        if (maybeDuration.isPresent()) {
-            duration = Long.toString(maybeDuration.get().toMinutes());
-        }
-        if (maybeStart.isPresent()) {
-            start = maybeStart.get().format(DATE_FORMATTER);
-        }
+        String duration = subtask.getDuration()
+                .map(Duration::toMinutes)
+                .map(d -> Long.toString(d))
+                .orElse(null);
+        String start = subtask.getStartTime()
+                .map(t -> t.format(DATE_FORMATTER))
+                .orElse(null);
 
         return String.format(
                 FORMAT,

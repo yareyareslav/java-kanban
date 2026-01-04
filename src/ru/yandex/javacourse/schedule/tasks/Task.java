@@ -14,7 +14,7 @@ public class Task {
 	protected Duration duration;
 	protected LocalDateTime startTime;
 
-	private void assignTaskProperties(String name, String description, TaskStatus status, Duration duration, LocalDateTime startTime) {
+	public Task(String name, String description, TaskStatus status, Duration duration, LocalDateTime startTime) {
 		this.name = name;
 		this.description = description;
 		this.status = status;
@@ -23,13 +23,11 @@ public class Task {
 	}
 
 	public Task(int id, String name, String description, TaskStatus status, Duration duration, LocalDateTime startTime) {
+		this(name, description, status, duration, startTime);
 		this.id = id;
-		assignTaskProperties(name, description, status, duration, startTime);
 	}
 
-	public Task(String name, String description, TaskStatus status, Duration duration, LocalDateTime startTime) {
-		assignTaskProperties(name, description, status, duration, startTime);
-	}
+
 
 	public int getId() {
 		return id;
