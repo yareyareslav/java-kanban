@@ -1,28 +1,33 @@
 package ru.yandex.javacourse.schedule.tasks;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Task {
 	protected int id;
 	protected String name;
 	protected TaskStatus status;
 	protected String description;
-	protected TaskType type;
+	private final TaskType type = TaskType.TASK;
+	protected Duration duration;
+	protected LocalDateTime startTime;
 
-	public Task(int id, String name, String description, TaskStatus status) {
+	public Task(String name, String description, TaskStatus status, Duration duration, LocalDateTime startTime) {
+		this.name = name;
+		this.description = description;
+		this.status = status;
+		this.duration = duration;
+		this.startTime = startTime;
+	}
+
+	public Task(int id, String name, String description, TaskStatus status, Duration duration, LocalDateTime startTime) {
+		this(name, description, status, duration, startTime);
 		this.id = id;
-		this.name = name;
-		this.description = description;
-		this.status = status;
-		this.type = TaskType.TASK;
 	}
 
-	public Task(String name, String description, TaskStatus status) {
-		this.name = name;
-		this.description = description;
-		this.status = status;
-		this.type = TaskType.TASK;
-	}
+
 
 	public int getId() {
 		return id;
@@ -60,6 +65,21 @@ public class Task {
 		return type;
 	}
 
+	public Optional<LocalDateTime> getStartTime() {
+		return Optional.ofNullable(startTime);
+	}
+
+	public Optional<Duration> getDuration() {
+		return Optional.ofNullable(duration);
+	}
+
+	public Optional<LocalDateTime> getEndTime() {
+		if (startTime == null || duration == null) {
+			return Optional.empty();
+		}
+		return Optional.of(startTime.plus(duration));
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(id);
@@ -80,6 +100,9 @@ public class Task {
 				", name='" + name + '\'' +
 				", status='" + status + '\'' +
 				", description='" + description + '\'' +
+				", startTime='" + startTime + '\'' +
+				", duration='" + duration + '\'' +
+				", endTime='" + (getEndTime().isPresent() ? getEndTime().get() : null) + '\'' +
 				'}';
 	}
 }

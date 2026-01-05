@@ -2,51 +2,51 @@ package ru.yandex.javacourse.schedule.manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.javacourse.schedule.tasks.Epic;
-import ru.yandex.javacourse.schedule.tasks.Subtask;
-import ru.yandex.javacourse.schedule.tasks.Task;
-import ru.yandex.javacourse.schedule.tasks.TaskStatus;
+import ru.yandex.javacourse.schedule.tasks.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
+public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     private File file;
 
-    @BeforeEach
-    public void initManager() {
+    @Override
+    protected FileBackedTaskManager createTaskManager() {
         try {
             file = File.createTempFile("autosave", ".txt");
             file.deleteOnExit();
-            manager = Managers.getFileBacked(file);
+            return FileBackedTaskManager.loadFromFile(file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+
     @Test
     public void addEntities_shouldPersistAllToFile() throws IOException {
-        Task task = new Task("Task 1", "Desc 1", TaskStatus.NEW);
+        Task task = new Task("Task 1", "Desc 1", TaskStatus.NEW, null, null);
         Epic epic = new Epic("Epic 1", "Desc epic");
 
         manager.addNewTask(task);
         manager.addNewEpic(epic);
 
-        Subtask subtask = new Subtask("Subtask 1", "Desc sub", TaskStatus.IN_PROGRESS, epic.getId());
+        Subtask subtask = new Subtask("Subtask 1", "Desc sub", TaskStatus.IN_PROGRESS, epic.getId(), null, null);
         manager.addNewSubtask(subtask);
 
         List<String> lines = Files.readAllLines(file.toPath());
 
         assertEquals(4, lines.size(), "Файл должен содержать заголовок и три строки сущностей");
-        assertEquals("id,type,name,status,description,epic", lines.getFirst(), "Ожидается заголовок CSV");
-        assertTrue(lines.contains("1,TASK,Task 1,NEW,Desc 1,"), "Файл должен содержать строку задачи");
-        assertTrue(lines.contains("2,EPIC,Epic 1,IN_PROGRESS,Desc epic,"), "Файл должен содержать строку эпика");
-        assertTrue(lines.contains("3,SUBTASK,Subtask 1,IN_PROGRESS,Desc sub,2"), "Файл должен содержать строку подзадачи");
+        assertEquals(TaskCsvConverter.getHeading(), lines.getFirst(), "Ожидается заголовок CSV");
+        assertTrue(lines.contains("1,TASK,Task 1,NEW,Desc 1,null,null,null"), "Файл должен содержать строку задачи");
+        assertTrue(lines.contains("2,EPIC,Epic 1,IN_PROGRESS,Desc epic,null,null,null"), "Файл должен содержать строку эпика");
+        assertTrue(lines.contains("3,SUBTASK,Subtask 1,IN_PROGRESS,Desc sub,2,null,null"), "Файл должен содержать строку подзадачи");
     }
 
 
@@ -55,10 +55,10 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
         File source = File.createTempFile("autosave-load", ".txt");
         source.deleteOnExit();
         String fileContent = String.join("\r\n",
-                "id,type,name,status,description,epic",
-                "7,TASK,Persisted task,NEW,Task description,",
-                "8,EPIC,Persisted epic,NEW,Epic description,",
-                "9,SUBTASK,Persisted subtask,DONE,Sub description,8"
+                TaskCsvConverter.getHeading(),
+                "7,TASK,Persisted task,NEW,Task description,null,null,null",
+                "8,EPIC,Persisted epic,NEW,Epic description,null,null,null",
+                "9,SUBTASK,Persisted subtask,DONE,Sub description,8,null,null"
         );
         Files.writeString(source.toPath(), fileContent);
 
@@ -68,9 +68,9 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
         assertEquals(1, manager.getEpics().size(), "Должен загрузиться один эпик");
         assertEquals(1, manager.getSubtasks().size(), "Должна загрузиться одна подзадача");
 
-        Task loadedTask = manager.getTask(7);
-        Epic loadedEpic = manager.getEpic(8);
-        Subtask loadedSubtask = manager.getSubtask(9);
+        Task loadedTask = manager.getTask(7).get();
+        Epic loadedEpic = manager.getEpic(8).get();
+        Subtask loadedSubtask = manager.getSubtask(9).get();
 
         assertEquals("Persisted task", loadedTask.getName(), "Имя задачи должно совпадать");
         assertEquals("Persisted epic", loadedEpic.getName(), "Имя эпика должно совпадать");
@@ -80,8 +80,8 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
 
     @Test
     public void deleteTask_task1ShouldNotBeInNewManager() throws IOException {
-        Task task1 = new Task(1,"Task 1", "Desc 1", TaskStatus.NEW);
-        Task task2 = new Task(2, "Task 2", "Desc 2", TaskStatus.NEW);
+        Task task1 = new Task(1,"Task 1", "Desc 1", TaskStatus.NEW, null, null);
+        Task task2 = new Task(2, "Task 2", "Desc 2", TaskStatus.NEW, null, null);
 
         manager.addNewTask(task1);
         manager.addNewTask(task2);
@@ -102,9 +102,9 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
 
     @Test
     public void deleteTask_changesShouldBeInTheNewManager() throws IOException {
-        Task task = new Task(1,"Task", "Desc Task", TaskStatus.NEW);
+        Task task = new Task(1,"Task", "Desc Task", TaskStatus.NEW, null, null);
         Epic epic = new Epic(3, "Epic", "Desc Epic");
-        Subtask subtask = new Subtask(2, "Subtask", "Desc Subtask", TaskStatus.NEW, 3);
+        Subtask subtask = new Subtask(2, "Subtask", "Desc Subtask", TaskStatus.NEW, 3, null, null);
 
 
         manager.addNewTask(task);
@@ -126,19 +126,19 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
         assertEquals(0, newManager.getTasks().size(), "Задач быть не должно");
         assertEquals(1, newManager.getEpics().size(), "Должен быть один эпик");
         assertEquals(1, newManager.getSubtasks().size(), "Должна быть одна подзадача");
-        assertEquals(epic, newManager.getEpic(3), "Должен быть один эпик");
-        assertEquals(subtask, newManager.getSubtask(2), "Должна быть одна подзадача");
+        assertEquals(epic, newManager.getEpic(3).get(), "Должен быть один эпик");
+        assertEquals(subtask, newManager.getSubtask(2).get(), "Должна быть одна подзадача");
 
     }
 
     @Test
-    public void loadFromFile_taskIdsShouldBeDifferent_addTaskWithExistingId() throws IOException {
-        Task task1 = new Task(1,"Task 1", "Desc Task", TaskStatus.NEW);
+    public void loadFromFile_taskIdsShouldBeDifferent_addTaskWithExistingId() {
+        Task task1 = new Task(1,"Task 1", "Desc Task", TaskStatus.NEW, null, null);
 
         manager.addNewTask(task1);
 
         TaskManager newManager = Managers.getFileBacked(file);
-        Task task2 = new Task(1,"Task 2", "Desc Task", TaskStatus.NEW);
+        Task task2 = new Task(1,"Task 2", "Desc Task", TaskStatus.NEW, null, null);
         newManager.addNewTask(task2);
 
         assertEquals(1, manager.getTasks().size(), "В старом менеджере должна быть 1 задача");
@@ -148,10 +148,10 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
     }
 
     @Test
-    public void loadFromFile_epicsShouldHaveSubtasks() throws IOException {
+    public void loadFromFile_epicsShouldHaveSubtasks() {
         Epic epic = new Epic(1, "Epic", "Desc Epic");
-        Subtask subtask1 = new Subtask(2,"Task 1", "Desc Task", TaskStatus.NEW, 1);
-        Subtask subtask2 = new Subtask(2,"Task 2", "Desc Task", TaskStatus.NEW, 1);
+        Subtask subtask1 = new Subtask(2,"Task 1", "Desc Task", TaskStatus.NEW, 1, null, null);
+        Subtask subtask2 = new Subtask(2,"Task 2", "Desc Task", TaskStatus.NEW, 1, null, null);
 
         manager.addNewEpic(epic);
         manager.addNewSubtask(subtask1);
@@ -159,6 +159,54 @@ public class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
 
         TaskManager newManager = Managers.getFileBacked(file);
 
-        assertEquals(2, newManager.getEpic(epic.getId()).getSubtaskIds().size(), "В эпике должно быть 2 подзадачи");
+        assertEquals(2, newManager.getEpic(epic.getId()).get().getSubtaskIds().size(), "В эпике должно быть 2 подзадачи");
     }
+
+    private void getEndTimeTemplate() {
+        LocalDateTime start = LocalDateTime.of(2020, 1, 1, 15, 0, 0);
+        Duration duration = Duration.ofMinutes(60);
+        LocalDateTime end = start.plus(duration);
+
+        Task task = new Task(1, "Task 1", "Testing task 1", TaskStatus.NEW, duration, start);
+        Epic epic = new Epic(2, "Epic 1", "Testing epic 1");
+        Subtask subtask = new Subtask(3, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 2, duration, start.plusYears(1));
+
+        manager.addNewTask(task);
+        manager.addNewEpic(epic);
+        manager.addNewSubtask(subtask);
+
+        assertEquals(end, task.getEndTime().get(), "Время завершения должно быть 01.01.2020 16:00");
+        assertEquals(end.plusYears(1), subtask.getEndTime().get(), "Время завершения должно быть 01.01.2020 16:00");
+        assertEquals(end.plusYears(1), epic.getEndTime().get(), "Время завершения должно быть 01.01.2020 16:00");
+    }
+
+    @Test
+    public void loadFromFile_shouldRestoreTasksWithTime() {
+        getEndTimeTemplate();
+
+        TaskManager newManager = Managers.getFileBacked(file);
+        Task task = newManager.getTask(1).get();
+        Epic epic = newManager.getEpic(2).get();
+        Subtask subtask = newManager.getSubtask(3).get();
+
+        assertEquals(manager.getTask(1).get(), task, "Задача должно быть равен предыдущей версии");
+        assertEquals(manager.getEpic(2).get(), epic, "Эпик должен быть равен предыдущей версии");
+        assertEquals(manager.getSubtask(3).get(), subtask, "Подзадача должно быть равен предыдущей версии");
+    }
+
+    @Test
+    public void getEndTime_shouldRestoreTasksWithTime() {
+        getEndTimeTemplate();
+
+        TaskManager newManager = Managers.getFileBacked(file);
+        Task task = newManager.getTask(1).get();
+        Epic epic = newManager.getEpic(2).get();
+        Subtask subtask = newManager.getSubtask(3).get();
+
+        assertEquals(manager.getTask(1).get().getEndTime().get(), task.getEndTime().get(), "Задача должна заканчиваться в то же время");
+        assertEquals(manager.getEpic(2).get().getEndTime().get(), epic.getEndTime().get(), "Эпик должен заканчиваться в то же время");
+        assertEquals(manager.getSubtask(3).get().getEndTime().get(), subtask.getEndTime().get(), "Подзадача должна заканчиваться в то же время");
+    }
+
+
 }

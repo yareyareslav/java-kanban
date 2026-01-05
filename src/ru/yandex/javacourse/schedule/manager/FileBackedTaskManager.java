@@ -50,7 +50,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 Task task = convertedTask.get();
 
                 switch (task.getType()) {
-                    case TaskType.TASK -> manager.tasks.put(task.getId(), task);
+                    case TaskType.TASK -> {
+                        manager.tasks.put(task.getId(), task);
+                        manager.addNewInPrioritizedTasks(task);
+                        break;
+                    }
                     case TaskType.SUBTASK -> {
                         final int epicId = ((Subtask) task).getEpicId();
                         Epic epic = manager.epics.get(epicId);
@@ -59,7 +63,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                         }
                         manager.subtasks.put(task.getId(), (Subtask) task);
                         epic.addSubtaskId(task.getId());
+                        manager.addNewInPrioritizedTasks(task);
                         manager.updateEpicStatus(epicId);
+                        manager.updateEpicTime(epicId);
                     }
                     case TaskType.EPIC -> manager.epics.put(task.getId(), (Epic) task);
                 }
@@ -154,15 +160,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
             FileBackedTaskManager manager = Managers.getFileBacked(storage);
 
-            Task task1 = new Task("Задача 1", "Описание 1", TaskStatus.NEW);
-            Task task2 = new Task("Задача 2", "Описание 2", TaskStatus.IN_PROGRESS);
+            Task task1 = new Task("Задача 1", "Описание 1", TaskStatus.NEW, null, null);
+            Task task2 = new Task("Задача 2", "Описание 2", TaskStatus.IN_PROGRESS, null, null);
             manager.addNewTask(task1);
             manager.addNewTask(task2);
 
             Epic epic1 = new Epic("Эпик 1", "Описание эпика 1");
             manager.addNewEpic(epic1);
-            Subtask sub1 = new Subtask("Подзадача 1", "Описание подзадачи 1", TaskStatus.NEW, epic1.getId());
-            Subtask sub2 = new Subtask("Подзадача 2", "Описание подзадачи 2", TaskStatus.DONE, epic1.getId());
+            Subtask sub1 = new Subtask("Подзадача 1", "Описание подзадачи 1", TaskStatus.NEW, epic1.getId(), null, null);
+            Subtask sub2 = new Subtask("Подзадача 2", "Описание подзадачи 2", TaskStatus.DONE, epic1.getId(), null, null);
             manager.addNewSubtask(sub1);
             manager.addNewSubtask(sub2);
 

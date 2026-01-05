@@ -1,9 +1,14 @@
 package ru.yandex.javacourse.schedule.tasks;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 public class TaskCsvConverter {
-    private static final String HEADING = "id,type,name,status,description,epic";
+    private static final String HEADING = "id,type,name,status,description,epic,duration,startTime";
+    private static final String FORMAT = "%d,%s,%s,%s,%s,%s,%s,%s\r\n";
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy|HH:mm");
 
     public static String getHeading() {
         return HEADING;
@@ -14,9 +19,25 @@ public class TaskCsvConverter {
         String name = task.getName();
         TaskStatus status = task.getStatus();
         String description = task.getDescription();
-        TaskType type = TaskType.TASK;
+        String duration = task.getDuration()
+                .map(Duration::toMinutes)
+                .map(d -> Long.toString(d))
+                .orElse(null);
+        String start = task.getStartTime()
+                .map(t -> t.format(DATE_FORMATTER))
+                .orElse(null);
 
-        return String.format("%d,%s,%s,%s,%s,\r\n", id, type, name, status, description);
+        return String.format(
+                FORMAT,
+                id,
+                task.getType(),
+                name,
+                status,
+                description,
+                null,
+                duration,
+                start
+        );
     }
 
     public static String taskToString(Subtask subtask) {
@@ -24,21 +45,26 @@ public class TaskCsvConverter {
         String name = subtask.getName();
         TaskStatus status = subtask.getStatus();
         String description = subtask.getDescription();
-        TaskType type = TaskType.SUBTASK;
         String epicId = Integer.toString(subtask.getEpicId());
+        String duration = subtask.getDuration()
+                .map(Duration::toMinutes)
+                .map(d -> Long.toString(d))
+                .orElse(null);
+        String start = subtask.getStartTime()
+                .map(t -> t.format(DATE_FORMATTER))
+                .orElse(null);
 
-        return String.format("%d,%s,%s,%s,%s,%s\r\n", id, type, name, status, description, epicId);
-    }
-
-    public static String taskToString(Epic epic) {
-        int id = epic.getId();
-        String name = epic.getName();
-        TaskStatus status = epic.getStatus();
-        String description = epic.getDescription();
-
-        TaskType type = TaskType.EPIC;
-
-        return String.format("%d,%s,%s,%s,%s,\r\n", id, type, name, status, description);
+        return String.format(
+                FORMAT,
+                id,
+                subtask.getType(),
+                name,
+                status,
+                description,
+                epicId,
+                duration,
+                start
+        );
     }
 
     public static Optional<Task> stringToTask(String line) {
@@ -48,7 +74,7 @@ public class TaskCsvConverter {
 
         String[] lineSplit = line.split(",");
 
-        if (lineSplit.length < 5) {
+        if (lineSplit.length < HEADING.split(",").length) {
             return Optional.empty();
         }
 
@@ -57,16 +83,16 @@ public class TaskCsvConverter {
         String name = lineSplit[2];
         TaskStatus status = TaskStatus.valueOf(lineSplit[3]);
         String description = lineSplit[4];
+        Duration duration = lineSplit[6].equals("null") ? null : Duration.ofMinutes(Long.parseLong(lineSplit[6]));
+        LocalDateTime start = lineSplit[7].equals("null") ? null : LocalDateTime.parse(lineSplit[7], DATE_FORMATTER);
 
         return switch (type) {
-            case TaskType.TASK -> Optional.of(new Task(id, name, description, status));
+            case TaskType.TASK -> Optional.of(new Task(id, name, description, status, duration, start));
             case TaskType.SUBTASK -> {
                 int epicId = Integer.parseInt(lineSplit[5]);
-                yield Optional.of(new Subtask(id, name, description, status, epicId));
+                yield Optional.of(new Subtask(id, name, description, status, epicId, duration, start));
             }
             case TaskType.EPIC -> Optional.of(new Epic(id, name, description));
         };
     }
-
-
 }

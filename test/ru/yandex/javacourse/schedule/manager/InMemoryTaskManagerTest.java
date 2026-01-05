@@ -1,153 +1,201 @@
 package ru.yandex.javacourse.schedule.manager;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.javacourse.schedule.exceptions.TimeIntersectionException;
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.Task;
 import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class InMemoryTaskManagerTest {
+public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
-    TaskManager manager;
-
-    @BeforeEach
-    public void initManager(){
-        manager = Managers.getDefault();
+    @Override
+    protected InMemoryTaskManager createTaskManager() {
+        return Managers.getDefault();
     }
 
     @Test
-    public void testAddTask() {
-        Task task = new Task("Test 1", "Testing task 1", TaskStatus.NEW);
+    public void getEndTime_shouldCalcEndTime_ifStartTimeAndDurationAreProvided() {
+        LocalDateTime start = LocalDateTime.of(2020, 1, 1, 15, 0, 0);
+        Duration duration = Duration.ofMinutes(60);
+        LocalDateTime end = start.plus(duration);
+
+        Task task = new Task(1, "Task 1", "Testing task 1", TaskStatus.NEW, duration, start);
+        Epic epic = new Epic(2, "Epic 1", "Testing epic 1");
+        Subtask subtask = new Subtask(3, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 2, duration, start.plusYears(1));
+
         manager.addNewTask(task);
-        assertEquals(1, manager.getTasks().size(), "task should be added");
-        Task addedTask = manager.getTasks().get(0);
-        assertEquals(task, addedTask, "added task id should be set");
-        Task byIdTask = manager.getTask(task.getId());
-        assertEquals(task, byIdTask, "added task id should be found");
+        manager.addNewEpic(epic);
+        manager.addNewSubtask(subtask);
+
+        assertEquals(end, task.getEndTime().get(), "Время завершения должно быть 01.01.2020 16:00");
+        assertEquals(end.plusYears(1), subtask.getEndTime().get(), "Время завершения должно быть 01.01.2020 16:00");
+        assertEquals(end.plusYears(1), epic.getEndTime().get(), "Время завершения должно быть 01.01.2020 16:00");
     }
 
     @Test
-    public void testAddTaskWithId(){
-        Task task = new Task(42, "Test 1", "Testing task 1", TaskStatus.NEW);
-        manager.addNewTask(task);
-        assertEquals(1, manager.getTasks().size(), "task should be added");
-        Task addedTask = manager.getTasks().get(0);
-        assertEquals(task, addedTask, "predefined task id should be set");
+    public void getEndTime_endTimeOfEpicShouldRemainAndStartTimeShouldRecalc_ifNewSubtaskStartsEarlier() {
+        Duration duration = Duration.ofMinutes(60);
+
+        LocalDateTime start1 = LocalDateTime.of(2020, 1, 1, 15, 0, 0);
+        LocalDateTime end1 = start1.plus(duration);
+
+        LocalDateTime start2 = LocalDateTime.of(2019, 1, 1, 15, 0, 0);
+        LocalDateTime end2 = start2.plus(duration);
+
+        Epic epic = new Epic(2, "Epic 1", "Testing epic 1");
+        Subtask subtask1 = new Subtask(3, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 2, duration, start1);
+        Subtask subtask2 = new Subtask(4, "Sub 2", "Testing subtask 2", TaskStatus.NEW, 2, duration, start2);
+
+        manager.addNewEpic(epic);
+        manager.addNewSubtask(subtask1);
+
+        assertEquals(end1, subtask1.getEndTime().get(), "Время завершения задачи должно быть 01.01.2020 16:00");
+        assertEquals(end2, subtask2.getEndTime().get(), "Время завершения подзадачи должно быть 01.01.2020 16:00");
+        assertEquals(end1, epic.getEndTime().get(), "Время завершения эпика должно быть 01.01.2020 16:00");
+
+        manager.addNewSubtask(subtask2);
+
+        assertEquals(start2, epic.getStartTime().get(), "Время начала эпика должно быть 01.01.2019 15:00");
+        assertEquals(end1, epic.getEndTime().get(), "Время завершения эпика должно быть 01.01.2020 16:00");
     }
 
     @Test
-    public void addNewTask_predefinedIdShouldRemain_predefinedTaskWasAddedBeforeUndefinedTask(){
-        Task task0 = new Task(2, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task1 = new Task("Test 2", "Testing task 2", TaskStatus.NEW);
-        manager.addNewTask(task0);
+    public void getEndTime_endTimeOfEpicShouldRecalcAndStartTimeShouldRemain_ifNewSubtaskEndsLater() {
+        Duration duration = Duration.ofMinutes(60);
+
+        LocalDateTime start1 = LocalDateTime.of(2020, 1, 1, 15, 0, 0);
+        LocalDateTime end1 = start1.plus(duration);
+
+        LocalDateTime start2 = LocalDateTime.of(2021, 1, 1, 15, 0, 0);
+        LocalDateTime end2 = start2.plus(duration);
+
+        Epic epic = new Epic(2, "Epic 1", "Testing epic 1");
+        Subtask subtask1 = new Subtask(3, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 2, duration, start1);
+        Subtask subtask2 = new Subtask(4, "Sub 2", "Testing subtask 2", TaskStatus.NEW, 2, duration, start2);
+
+        manager.addNewEpic(epic);
+        manager.addNewSubtask(subtask1);
+
+        assertEquals(end1, subtask1.getEndTime().get(), "Время завершения задачи должно быть 01.01.2020 16:00");
+        assertEquals(end2, subtask2.getEndTime().get(), "Время завершения подзадачи должно быть 01.01.2021 16:00");
+        assertEquals(end1, epic.getEndTime().get(), "Время завершения эпика должно быть 01.01.2020 16:00");
+
+        manager.addNewSubtask(subtask2);
+
+        assertEquals(start1, epic.getStartTime().get(), "Время начала эпика должно быть 01.01.2020 15:00");
+        assertEquals(end2, epic.getEndTime().get(), "Время завершения эпика должно быть 01.01.2021 16:00");
+    }
+
+    @Test
+    public void getDuration_shouldBeEqualToSumOfEpicSubtasksDuration() {
+        Duration duration = Duration.ofMinutes(60);
+
+        LocalDateTime start1 = LocalDateTime.of(2020, 1, 1, 15, 0, 0);
+        LocalDateTime start2 = LocalDateTime.of(2019, 1, 1, 15, 0, 0);
+
+        Epic epic = new Epic(2, "Epic 1", "Testing epic 1");
+        Subtask subtask1 = new Subtask(3, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 2, duration, start1);
+        Subtask subtask2 = new Subtask(4, "Sub 2", "Testing subtask 2", TaskStatus.NEW, 2, duration, start2);
+
+        manager.addNewEpic(epic);
+        manager.addNewSubtask(subtask1);
+        manager.addNewSubtask(subtask2);
+
+        assertEquals(subtask1.getDuration().get().plus(subtask2.getDuration().get()), epic.getDuration().get(), "Duration should be 2 hours");
+    }
+
+    @Test
+    public void addNewTask_shouldThrowException_ifTasksIntersectByTime() {
+        LocalDateTime start = LocalDateTime.of(2020, 1, 1, 15, 0, 0);
+        Duration duration = Duration.ofMinutes(60);
+        LocalDateTime end = start.plus(duration);
+
+        Task task1 = new Task(1, "Task 1", "Testing task 1", TaskStatus.NEW, duration, start);
+        Task task2 = new Task(2, "Task 2", "Testing task 2", TaskStatus.DONE, duration, start.minusMinutes(30));
+
         manager.addNewTask(task1);
-        assertEquals(2, manager.getTasks().size(), "the same size of tasks in manager");
-        assertEquals(2, task0.getId(), "task predefined id should not change");
-        assertEquals(1, task1.getId(), "autogenerated id should be 1");
+
+        TimeIntersectionException exception = assertThrows(
+                TimeIntersectionException.class,
+                () -> manager.addNewTask(task2)
+        );
+        assertEquals("Задача пересекается по времени с другими задачами", exception.getMessage());
     }
 
     @Test
-    public void addNewTask_predefinedIdShouldChange_predefinedTaskWasAddedAfterUndefinedTask(){
-        Task task0 = new Task("Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task1 = new Task(1, "Test 2", "Testing task 2", TaskStatus.NEW);
-        manager.addNewTask(task0);
-        manager.addNewTask(task1);
-        assertEquals(2, manager.getTasks().size(), "the same size of tasks in manager");
-        assertEquals(1, task0.getId(), "autogenerated id should be 1");
-        assertEquals(2, task1.getId(), "predefined task will change id due to the order of addition");
+    public void addNewSubtask_shouldThrowException_ifTasksIntersectByTime() {
+        LocalDateTime start = LocalDateTime.of(2020, 1, 1, 15, 0, 0);
+        Duration duration = Duration.ofMinutes(60);
+
+        Epic epic = new Epic(2, "Epic 1", "Testing epic 1");
+        Subtask subtask1 = new Subtask(3, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 2, duration, start);
+        Subtask subtask2 = new Subtask(4, "Sub 2", "Testing subtask 2", TaskStatus.NEW, 2, duration, start.minusMinutes(30));
+
+        manager.addNewEpic(epic);
+        manager.addNewTask(subtask1);
+
+        TimeIntersectionException exception = assertThrows(
+                TimeIntersectionException.class,
+                () -> manager.addNewSubtask(subtask2)
+        );
+        assertEquals("Подзадача пересекается по времени с другими задачами", exception.getMessage());
     }
 
     @Test
-    public void checkTaskNotChangedAfterAddTask() {
-        int id = 1;
-        String name = "Test 1";
-        String description = "Testing task 1";
-        TaskStatus status = TaskStatus.NEW;
-        Task task1before = new Task(id, name, description, status);
-        manager.addNewTask(task1before);
-        Task task1after = manager.getTask(task1before.getId());
-        assertEquals(task1after.getId(), id);
-        assertEquals(task1after.getDescription(), description);
-        assertEquals(task1after.getStatus(), status);
-        assertEquals(task1after.getName(), name);
+    public void updateEpicStatus_shouldBeNew_allSubtasksNew() {
+        Epic epic = new Epic(1, "Epic 1", "Testing epic 1");
+        Subtask subtask1 = new Subtask(2, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 1, null, null);
+        Subtask subtask2 = new Subtask(3, "Sub 2", "Testing subtask 2", TaskStatus.NEW, 1, null, null);
+
+        manager.addNewEpic(epic);
+        manager.addNewSubtask(subtask1);
+        manager.addNewSubtask(subtask2);
+
+        assertEquals(TaskStatus.NEW, epic.getStatus(), "Статус эпика должен быть NEW");
     }
 
     @Test
-    public void addNewTask_updateTaskId_newTaskWithSetId() {
-        Task task0 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task1 = new Task(1, "Test 2", "Testing task 2", TaskStatus.NEW);
+    public void updateEpicStatus_shouldBeDone_allSubtasksDone() {
+        Epic epic = new Epic(1, "Epic 1", "Testing epic 1");
+        Subtask subtask1 = new Subtask(2, "Sub 1", "Testing subtask 1", TaskStatus.DONE, 1, null, null);
+        Subtask subtask2 = new Subtask(3, "Sub 2", "Testing subtask 2", TaskStatus.DONE, 1, null, null);
 
-        manager.addNewTask(task0);
-        manager.addNewTask(task1);
+        manager.addNewEpic(epic);
+        manager.addNewSubtask(subtask1);
+        manager.addNewSubtask(subtask2);
 
-        assertNotEquals(task0.getId(), task1.getId(), "ids should be unequal");
+        assertEquals(TaskStatus.DONE, epic.getStatus(), "Статус эпика должен быть DONE");
     }
 
     @Test
-    public void addNewTask_createNewTaskWithNewId_newTaskHasIdExistInManager() {
-        Task task0 = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
-        Task task1 = new Task("Test 2", "Testing task 2 with no set id", TaskStatus.NEW);
+    public void updateEpicStatus_shouldBeInProgress_oneSubtaskNewRestSubtasksDone() {
+        Epic epic = new Epic(1, "Epic 1", "Testing epic 1");
+        Subtask subtask1 = new Subtask(2, "Sub 1", "Testing subtask 1", TaskStatus.NEW, 1, null, null);
+        Subtask subtask2 = new Subtask(3, "Sub 2", "Testing subtask 2", TaskStatus.DONE, 1, null, null);
 
-        manager.addNewTask(task0);
-        manager.addNewTask(task1);
+        manager.addNewEpic(epic);
+        manager.addNewSubtask(subtask1);
+        manager.addNewSubtask(subtask2);
 
-        assertNotEquals(task0.getId(), task1.getId(), "ids should be unequal");
+        assertEquals(TaskStatus.IN_PROGRESS, epic.getStatus(), "Статус эпика должен быть IN_PROGRESS");
     }
 
     @Test
-    public void addNewSubtask_updateSubtaskId_newSubtaskWithSetId() {
-        Epic e0 = new Epic(3, "Test 1", "Testing epic for subtasks");
-        manager.addNewEpic(e0);
+    public void updateEpicStatus_shouldBeInProgress_allInProgress() {
+        Epic epic = new Epic(1, "Epic 1", "Testing epic 1");
+        Subtask subtask1 = new Subtask(2, "Sub 1", "Testing subtask 1", TaskStatus.IN_PROGRESS, 1, null, null);
+        Subtask subtask2 = new Subtask(3, "Sub 2", "Testing subtask 2", TaskStatus.IN_PROGRESS, 1, null, null);
 
-        Subtask s0 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, e0.getId());
-        Subtask s1 = new Subtask(1, "Test 2", "Testing subtask 2", TaskStatus.NEW, e0.getId());
-        manager.addNewSubtask(s0);
-        manager.addNewSubtask(s1);
+        manager.addNewEpic(epic);
+        manager.addNewSubtask(subtask1);
+        manager.addNewSubtask(subtask2);
 
-        assertNotEquals(s0.getId(), s1.getId(), "ids should be unequal");
-    }
-
-    @Test
-    public void addNewSubtask_createNewSubtaskWithNewId_newSubtaskHasIdExistInManager() {
-        Epic e0 = new Epic(3, "Test 1", "Testing epic for subtasks");
-        manager.addNewEpic(e0);
-
-        Subtask s0 = new Subtask(1, "Test 1", "Testing task 1", TaskStatus.NEW, 3);
-        Subtask s1 = new Subtask("Test 2", "Testing task 2", TaskStatus.IN_PROGRESS, 3);
-
-        manager.addNewSubtask(s0);
-        manager.addNewSubtask(s1);
-
-        assertNotEquals(s0.getId(), s1.getId(), "ids should be unequal");
-    }
-
-    @Test
-    public void addNewEpic_updateEpicId_newEpicWithSetId() {
-        Epic e0 = new Epic(1, "Test 1", "Testing task 1");
-        Epic e1 = new Epic(1, "Test 2", "Testing task 2");
-
-        manager.addNewEpic(e0);
-        manager.addNewEpic(e1);
-
-        assertNotEquals(e0.getId(), e1.getId(), "ids should be unequal");
-    }
-
-    @Test
-    public void addNewEpic_createNewEpicWithNewId_newEpicHasIdExistInManager() {
-        Epic e0 = new Epic(1, "Test 1", "Testing task 1");
-        Epic e1 = new Epic("Test 2", "Testing task 2");
-
-        manager.addNewEpic(e0);
-        manager.addNewEpic(e1);
-
-        assertNotEquals(e0.getId(), e1.getId(), "ids should be unequal");
+        assertEquals(TaskStatus.IN_PROGRESS, epic.getStatus(), "Статус эпика должен быть IN_PROGRESS");
     }
 }
