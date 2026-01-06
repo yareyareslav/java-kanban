@@ -1,7 +1,7 @@
 package ru.yandex.javacourse.schedule.http;
 
 import com.sun.net.httpserver.HttpServer;
-import ru.yandex.javacourse.schedule.http.handlers.TasksHandler;
+import ru.yandex.javacourse.schedule.http.handlers.*;
 import ru.yandex.javacourse.schedule.manager.InMemoryTaskManager;
 import ru.yandex.javacourse.schedule.manager.Managers;
 import ru.yandex.javacourse.schedule.manager.TaskManager;
@@ -46,7 +46,10 @@ public class HttpTaskServer {
 
         HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
         server.createContext("/tasks", new TasksHandler(manager));
-
+        server.createContext("/subtasks", new SubtasksHandler(manager));
+        server.createContext("/epics", new EpicsHandler(manager));
+        server.createContext("/history", new HistoryHandler(manager));
+        server.createContext("/prioritized", new PrioritizedHandler(manager));
 
         server.start();
         System.out.println("HTTP-сервер запущен на " + PORT + " порту!");

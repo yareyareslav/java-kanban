@@ -5,16 +5,16 @@ import com.sun.net.httpserver.HttpExchange;
 import ru.yandex.javacourse.schedule.exceptions.NotFoundException;
 import ru.yandex.javacourse.schedule.exceptions.TimeIntersectionException;
 import ru.yandex.javacourse.schedule.manager.TaskManager;
-import ru.yandex.javacourse.schedule.tasks.Task;
+import ru.yandex.javacourse.schedule.tasks.Subtask;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
-public class TasksHandler extends AbstractHandler {
-    private enum Endpoint { GET_TASKS, GET_TASK, POST_TASK, DELETE_TASK, UNKNOWN }
+public class SubtasksHandler extends AbstractHandler {
+    private enum Endpoint {GET_SUBTASKS, GET_SUBTASK, POST_SUBTASK, DELETE_SUBTASK, UNKNOWN }
 
-    public TasksHandler(TaskManager manager) {
+    public SubtasksHandler(TaskManager manager) {
         super(manager);
     }
 
@@ -24,10 +24,10 @@ public class TasksHandler extends AbstractHandler {
 
         return switch (method) {
             case "GET" -> pathParts.length == 3 ?
-                    Endpoint.GET_TASK :
-                    Endpoint.GET_TASKS;
-            case "POST" -> Endpoint.POST_TASK;
-            case "DELETE" -> Endpoint.DELETE_TASK;
+                    Endpoint.GET_SUBTASK :
+                    Endpoint.GET_SUBTASKS;
+            case "POST" -> Endpoint.POST_SUBTASK;
+            case "DELETE" -> Endpoint.DELETE_SUBTASK;
             default -> Endpoint.UNKNOWN;
         };
     }
@@ -38,15 +38,16 @@ public class TasksHandler extends AbstractHandler {
             Endpoint endpoint = getEndpoint(exchange);
 
             switch (endpoint) {
-                case Endpoint.GET_TASKS -> handleGetTasks(exchange);
-                case Endpoint.GET_TASK -> handleGetTaskById(exchange);
-                case Endpoint.POST_TASK -> handlePostTask(exchange);
-                case Endpoint.DELETE_TASK -> handleDeleteTask(exchange);
+                case Endpoint.GET_SUBTASKS -> handleGetTasks(exchange);
+                case Endpoint.GET_SUBTASK -> handleGetTaskById(exchange);
+                case Endpoint.POST_SUBTASK -> handlePostSubtask(exchange);
+                case Endpoint.DELETE_SUBTASK -> handleDeleteSubtask(exchange);
                 default -> writeResponse(exchange, "Такого эндпоинта не существует", 404);
             }
         } catch (JsonSyntaxException e) {
             writeResponse(exchange, "Ошибка синтаксиса JSON: " + e.getMessage(), 400);
         }
+
     }
 
     private void handleGetTasks(HttpExchange exchange) throws IOException {
@@ -54,21 +55,21 @@ public class TasksHandler extends AbstractHandler {
     }
 
     private void handleGetTaskById(HttpExchange exchange) throws IOException {
-            Optional<Integer> taskIdOpt = getId(exchange);
+        Optional<Integer> subtaskOptId = getId(exchange);
 
-            if (taskIdOpt.isEmpty()) {
-                writeResponse(exchange, "Некорректный идентификатор задачи", 400);
-                return;
-            }
-            Optional<Task> taskOpt = manager.getTask(taskIdOpt.get());
-            if (taskOpt.isEmpty()) {
-                writeResponse(exchange, "Задачи с таким идентификатором не существует", 404);
-                return;
-            }
-            writeResponse(exchange, gson.toJson(taskOpt.get()), 200);
+        if (subtaskOptId.isEmpty()) {
+            writeResponse(exchange, "Некорректный идентификатор подзадачи", 400);
+            return;
+        }
+        Optional<Subtask> subtaskOpt = manager.getSubtask(subtaskOptId.get());
+        if (subtaskOpt.isEmpty()) {
+            writeResponse(exchange, "Подзадачи с таким идентификатором не существует", 404);
+            return;
+        }
+        writeResponse(exchange, gson.toJson(subtaskOpt.get()), 200);
     }
 
-    private void handlePostTask(HttpExchange exchange) throws IOException {
+    private void handlePostSubtask(HttpExchange exchange) throws IOException {
         try (InputStream inputStream = exchange.getRequestBody()) {
             String body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
 
@@ -77,21 +78,21 @@ public class TasksHandler extends AbstractHandler {
                 return;
             }
 
-            Task task = gson.fromJson(body, Task.class);
+            Subtask subtask = gson.fromJson(body, Subtask.class);
 
-            if (task == null || task.getName() == null || task.getDescription() == null || task.getStatus() == null) {
+            if (subtask == null || subtask.getName() == null || subtask.getDescription() == null || subtask.getStatus() == null) {
                 writeResponse(exchange, "Некорректный JSON или отсутствуют обязательные поля", 400);
                 return;
             }
 
             try {
                 String response;
-                if (task.getId() == 0) {
-                    response = "Задача создана";
-                    manager.addNewTask(task);
+                if (subtask.getId() == 0) {
+                    response = "Подзадача создана";
+                    manager.addNewSubtask(subtask);
                 } else {
-                    response = "Задача обновлена";
-                    manager.updateTask(task);
+                    response = "Подзадача обновлена";
+                    manager.updateSubtask(subtask);
                 }
                 writeResponse(exchange, response, 201);
             } catch (TimeIntersectionException e) {
@@ -104,17 +105,17 @@ public class TasksHandler extends AbstractHandler {
         }
     }
 
-    private void handleDeleteTask(HttpExchange exchange) throws IOException {
-        Optional<Integer> taskIdOpt = getId(exchange);
+    private void handleDeleteSubtask(HttpExchange exchange) throws IOException {
+        Optional<Integer> subtaskOptId = getId(exchange);
 
-        if (taskIdOpt.isEmpty()) {
-            writeResponse(exchange, "Некорректный идентификатор задачи", 400);
+        if (subtaskOptId.isEmpty()) {
+            writeResponse(exchange, "Некорректный идентификатор подзадачи", 400);
             return;
         }
 
         try {
-            manager.deleteTask(taskIdOpt.get());
-            writeResponse(exchange, "Задача удалена", 200);
+            manager.deleteSubtask(subtaskOptId.get());
+            writeResponse(exchange, "Подзадача удалена", 200);
         } catch (NotFoundException e) {
             writeResponse(exchange, e.getMessage(), 404);
         }
