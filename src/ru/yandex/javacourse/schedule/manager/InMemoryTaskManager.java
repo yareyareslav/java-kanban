@@ -215,9 +215,11 @@ public class InMemoryTaskManager implements TaskManager {
 	}
 
 	@Override
-	public void deleteTask(int id) {
+	public void deleteTask(int id) throws NotFoundException {
 		Task task = tasks.remove(id);
-		prioritizedTasks.remove(task);
+		if (task.getStartTime().isPresent()) {
+			prioritizedTasks.remove(task);
+		}
 		historyManager.remove(id);
 	}
 
