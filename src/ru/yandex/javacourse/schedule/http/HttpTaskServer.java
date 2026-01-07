@@ -1,5 +1,6 @@
 package ru.yandex.javacourse.schedule.http;
 
+import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpServer;
 import ru.yandex.javacourse.schedule.http.handlers.*;
 import ru.yandex.javacourse.schedule.manager.Managers;
@@ -18,8 +19,14 @@ import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
 
 public class HttpTaskServer {
     private static final int PORT = 8081;
+    private final TaskManager manager;
+    private HttpServer server;
 
-    private static void fillManager(TaskManager manager) {
+    public HttpTaskServer(TaskManager manager) {
+        this.manager = manager;
+    }
+
+    private void fillManager() {
         Task extraTask1 = new Task("Task #1", "Task1 description", NEW, null, null);
         Task extraTask2 = new Task("Task #2", "Task2 description", NEW, Duration.ofMinutes(50), LocalDateTime.of(2017, 12, 30, 12, 50));
         manager.addNewTask(extraTask1);
@@ -39,11 +46,8 @@ public class HttpTaskServer {
         manager.addNewSubtask(extraSubtask3);
     }
 
-    public static void start() throws IOException {
-        TaskManager manager = Managers.getDefault();
-        fillManager(manager);
-
-        HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
+    public void start() throws IOException {
+        server = HttpServer.create(new InetSocketAddress(PORT), 0);
         server.createContext("/tasks", new TasksHandler(manager));
         server.createContext("/subtasks", new SubtasksHandler(manager));
         server.createContext("/epics", new EpicsHandler(manager));
@@ -54,7 +58,13 @@ public class HttpTaskServer {
         System.out.println("HTTP-сервер запущен на " + PORT + " порту!");
     }
 
+    public void close(int delay) {
+        server.stop(delay);
+    }
+
     public static void main(String[] args) throws IOException {
-        start();
+        HttpTaskServer server = new HttpTaskServer(Managers.getDefault());
+        server.fillManager();
+        server.start();
     }
 }

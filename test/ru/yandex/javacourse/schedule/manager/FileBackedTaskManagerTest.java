@@ -1,6 +1,5 @@
 package ru.yandex.javacourse.schedule.manager;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.javacourse.schedule.tasks.*;
 

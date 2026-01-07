@@ -172,7 +172,7 @@ public class InMemoryTaskManager implements TaskManager {
 	}
 
 	@Override
-	public void updateTask(Task task) {
+	public void updateTask(Task task) throws TimeIntersectionException {
 		if (doesIntersectByTime(task)) {
 			throw new TimeIntersectionException("Задача пересекается по времени с другими задачами");
 		}
