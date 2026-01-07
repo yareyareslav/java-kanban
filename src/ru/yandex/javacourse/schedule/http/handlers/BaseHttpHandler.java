@@ -14,18 +14,18 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
-public abstract class AbstractHandler implements HttpHandler {
+public abstract class BaseHttpHandler implements HttpHandler {
     protected static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     protected final Gson gson = new GsonBuilder()
             .setPrettyPrinting()
+            .serializeNulls()
             .registerTypeAdapter(Duration.class, new DurationAdapter())
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .create();
     protected final TaskManager manager;
 
-    public AbstractHandler(TaskManager manager) {
+    public BaseHttpHandler(TaskManager manager) {
         this.manager = manager;
     }
 
@@ -33,18 +33,40 @@ public abstract class AbstractHandler implements HttpHandler {
                                String responseString,
                                int responseCode) throws IOException {
         byte[] bytes = responseString.getBytes(DEFAULT_CHARSET);
+        exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
         exchange.sendResponseHeaders(responseCode, bytes.length);
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(bytes);
         }
     }
 
-    protected Optional<Integer> getId(HttpExchange exchange) {
+    protected void sendText(HttpExchange exchange, String response) throws IOException {
+        writeResponse(exchange, response, 200);
+    }
+
+    protected void sendUpdated(HttpExchange exchange, String response) throws IOException {
+        writeResponse(exchange, response, 201);
+    }
+
+    protected void sendBadRequest(HttpExchange exchange, String response) throws IOException {
+        writeResponse(exchange, response, 400);
+    }
+
+    protected void sendNotFound(HttpExchange exchange, String response) throws IOException {
+        writeResponse(exchange, response, 404);
+    }
+
+    protected void sendHasIntersections(HttpExchange exchange, String response) throws IOException {
+        writeResponse(exchange, response, 406);
+    }
+
+    protected void sendServer(HttpExchange exchange) throws IOException {
+        writeResponse(exchange, "Ошибка сервера", 500);
+    }
+
+    protected Integer getId(HttpExchange exchange) throws NumberFormatException {
         String[] pathParts = exchange.getRequestURI().getPath().split("/");
-        try {
-            return Optional.of(Integer.parseInt(pathParts[2]));
-        } catch (NumberFormatException exception) {
-            return Optional.empty();
-        }
+        return Integer.parseInt(pathParts[2]);
+
     }
 }

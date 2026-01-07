@@ -3,18 +3,15 @@ package ru.yandex.javacourse.schedule.http.handlers;
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import ru.yandex.javacourse.schedule.exceptions.NotFoundException;
-import ru.yandex.javacourse.schedule.exceptions.TimeIntersectionException;
 import ru.yandex.javacourse.schedule.manager.TaskManager;
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
-import ru.yandex.javacourse.schedule.tasks.Task;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Optional;
 
-public class EpicsHandler extends AbstractHandler {
+public class EpicsHandler extends BaseHttpHandler {
     private enum Endpoint { GET_EPICS, GET_EPIC, GET_SUBTASKS, POST_EPIC, DELETE_EPIC, UNKNOWN }
 
     public EpicsHandler(TaskManager manager) {
@@ -33,7 +30,7 @@ public class EpicsHandler extends AbstractHandler {
                 if (pathParts.length == 4) {
                     yield Endpoint.GET_SUBTASKS;
                 }
-                yield Endpoint.GET_SUBTASKS;
+                yield Endpoint.GET_EPICS;
             }
             case "POST" -> Endpoint.POST_EPIC;
             case "DELETE" -> Endpoint.DELETE_EPIC;
@@ -55,49 +52,41 @@ public class EpicsHandler extends AbstractHandler {
                 default -> writeResponse(exchange, "Такого эндпоинта не существует", 404);
             }
         } catch (JsonSyntaxException e) {
-            writeResponse(exchange, "Ошибка синтаксиса JSON: " + e.getMessage(), 400);
+            sendBadRequest(exchange, "Ошибка синтаксиса JSON: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendServer(exchange);
         }
     }
 
     private void handleGetEpics(HttpExchange exchange) throws IOException {
-        writeResponse(exchange, gson.toJson(manager.getEpics()), 200);
+        sendText(exchange, gson.toJson(manager.getEpics()));
     }
 
     private void handleGetEpicById(HttpExchange exchange) throws IOException {
-        Optional<Integer> epicIdOpt = getId(exchange);
-
-        if (epicIdOpt.isEmpty()) {
-            writeResponse(exchange, "Некорректный идентификатор эпика", 400);
-            return;
+        try {
+            Epic epic = manager.getEpic(getId(exchange));
+            sendText(exchange, gson.toJson(epic));
+        } catch (NumberFormatException e) {
+            sendBadRequest(exchange, "Некорректный идентификатор эпика");
+        } catch (NotFoundException e) {
+            sendNotFound(exchange, e.getMessage());
         }
-        Optional<Epic> epicOpt = manager.getEpic(epicIdOpt.get());
-        if (epicOpt.isEmpty()) {
-            writeResponse(exchange, "Эпика с таким идентификатором не существует", 404);
-            return;
-        }
-        writeResponse(exchange, gson.toJson(epicOpt.get()), 200);
     }
 
     private void handleGetSubtasks(HttpExchange exchange) throws IOException {
-        Optional<Integer> epicIdOpt = getId(exchange);
-
-        if (epicIdOpt.isEmpty()) {
-            writeResponse(exchange, "Некорректный идентификатор эпика", 400);
-            return;
+        try {
+            Epic epic = manager.getEpic(getId(exchange));
+            List<Subtask> subtasks = epic.getSubtaskIds()
+                    .stream()
+                    .map(manager::getSubtask)
+                    .toList();
+            sendText(exchange, gson.toJson(subtasks));
+        } catch (NumberFormatException e) {
+            sendBadRequest(exchange, "Некорректный идентификатор эпика");
+        } catch (NotFoundException e) {
+            sendNotFound(exchange, e.getMessage());
         }
-        Optional<Epic> epicOpt = manager.getEpic(epicIdOpt.get());
-        if (epicOpt.isEmpty()) {
-            writeResponse(exchange, "Эпика с таким идентификатором не существует", 404);
-            return;
-        }
-        List<Subtask> subtasks = epicOpt.get().getSubtaskIds()
-                .stream()
-                .map(manager::getSubtask)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
-
-        writeResponse(exchange, gson.toJson(subtasks), 200);
     }
 
     private void handlePostEpic(HttpExchange exchange) throws IOException {
@@ -105,38 +94,33 @@ public class EpicsHandler extends AbstractHandler {
             String body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
 
             if (body.isEmpty()) {
-                writeResponse(exchange, "Тело запроса пусто", 400);
+                sendBadRequest(exchange, "Тело запроса пусто");
                 return;
             }
 
-            Epic epic = gson.fromJson(body, Epic.class);
+            Epic epicFromJson = gson.fromJson(body, Epic.class);
+            Epic epic = new Epic(epicFromJson.getName(), epicFromJson.getDescription());
 
-            if (epic == null || epic.getName() == null || epic.getDescription() == null) {
-                writeResponse(exchange, "Некорректный JSON или отсутствуют обязательные поля", 400);
+            if (epic.getName() == null || epic.getDescription() == null) {
+                sendBadRequest(exchange, "Некорректный JSON или отсутствуют обязательные поля");
                 return;
             }
 
             manager.addNewEpic(epic);
-            writeResponse(exchange, "Эпик создан", 201);
+            sendUpdated(exchange, "Эпик создан");
         } catch (JsonSyntaxException e) {
-            writeResponse(exchange, "Ошибка синтаксиса JSON: " + e.getMessage(), 400);
+            sendBadRequest(exchange, "Ошибка синтаксиса JSON: " + e.getMessage());
         }
     }
 
     private void handleDeleteEpic(HttpExchange exchange) throws IOException {
-        Optional<Integer> epicIdOpt = getId(exchange);
-
-        if (epicIdOpt.isEmpty()) {
-            writeResponse(exchange, "Некорректный идентификатор задачи", 400);
-            return;
-        }
-
-        int epicId = epicIdOpt.get();
         try {
-            manager.deleteEpic(epicId);
-            writeResponse(exchange, "Задача удалена", 200);
+            manager.deleteEpic(getId(exchange));
+            sendText(exchange, "Задача удалена");
+        } catch (NumberFormatException e) {
+            sendBadRequest(exchange, "Некорректный идентификатора эпика");
         } catch (NotFoundException e) {
-            writeResponse(exchange, e.getMessage(), 404);
+            sendNotFound(exchange, e.getMessage());
         }
     }
 }

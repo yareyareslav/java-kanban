@@ -6,7 +6,7 @@ import ru.yandex.javacourse.schedule.manager.TaskManager;
 
 import java.io.IOException;
 
-public class HistoryHandler extends AbstractHandler {
+public class HistoryHandler extends BaseHttpHandler {
     private enum Endpoint { GET_HISTORY, UNKNOWN }
 
     public HistoryHandler(TaskManager manager) {
@@ -29,14 +29,16 @@ public class HistoryHandler extends AbstractHandler {
 
             switch (endpoint) {
                 case Endpoint.GET_HISTORY -> handleGetHistory(exchange);
-                default -> writeResponse(exchange, "Такого эндпоинта не существует", 404);
+                default -> sendNotFound(exchange, "Такого эндпоинта не существует");
             }
         } catch (JsonSyntaxException e) {
-            writeResponse(exchange, "Ошибка синтаксиса JSON: " + e.getMessage(), 400);
+            sendBadRequest(exchange, "Ошибка синтаксиса JSON: " + e.getMessage());
+        } catch (Exception e) {
+            sendServer(exchange);
         }
     }
 
     private void handleGetHistory(HttpExchange exchange) throws IOException {
-        writeResponse(exchange, gson.toJson(manager.getHistory()), 200);
+        sendText(exchange, gson.toJson(manager.getHistory()));
     }
 }

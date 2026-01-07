@@ -21,11 +21,11 @@ public interface TaskManager {
 
 	List<Subtask> getEpicSubtasks(int epicId);
 
-	Optional<Task> getTask(int id);
+	Task getTask(int id);
 
-	Optional<Subtask> getSubtask(int id);
+	Subtask getSubtask(int id);
 
-	Optional<Epic> getEpic(int id);
+	Epic getEpic(int id);
 
 	int addNewTask(Task task);
 

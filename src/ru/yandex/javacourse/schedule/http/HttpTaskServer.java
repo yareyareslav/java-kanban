@@ -2,7 +2,6 @@ package ru.yandex.javacourse.schedule.http;
 
 import com.sun.net.httpserver.HttpServer;
 import ru.yandex.javacourse.schedule.http.handlers.*;
-import ru.yandex.javacourse.schedule.manager.InMemoryTaskManager;
 import ru.yandex.javacourse.schedule.manager.Managers;
 import ru.yandex.javacourse.schedule.manager.TaskManager;
 import ru.yandex.javacourse.schedule.tasks.Epic;
@@ -40,7 +39,7 @@ public class HttpTaskServer {
         manager.addNewSubtask(extraSubtask3);
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void start() throws IOException {
         TaskManager manager = Managers.getDefault();
         fillManager(manager);
 
@@ -53,5 +52,9 @@ public class HttpTaskServer {
 
         server.start();
         System.out.println("HTTP-сервер запущен на " + PORT + " порту!");
+    }
+
+    public static void main(String[] args) throws IOException {
+        start();
     }
 }

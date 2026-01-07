@@ -9,10 +9,9 @@ import ru.yandex.javacourse.schedule.tasks.Subtask;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Optional;
 
-public class SubtasksHandler extends AbstractHandler {
-    private enum Endpoint {GET_SUBTASKS, GET_SUBTASK, POST_SUBTASK, DELETE_SUBTASK, UNKNOWN }
+public class SubtasksHandler extends BaseHttpHandler {
+    private enum Endpoint { GET_SUBTASKS, GET_SUBTASK, POST_SUBTASK, DELETE_SUBTASK, UNKNOWN }
 
     public SubtasksHandler(TaskManager manager) {
         super(manager);
@@ -46,27 +45,26 @@ public class SubtasksHandler extends AbstractHandler {
             }
         } catch (JsonSyntaxException e) {
             writeResponse(exchange, "Ошибка синтаксиса JSON: " + e.getMessage(), 400);
+        } catch (Exception e) {
+            e.printStackTrace();
+            writeResponse(exchange, "Ошибка сервера", 500);
         }
 
     }
 
     private void handleGetTasks(HttpExchange exchange) throws IOException {
-        writeResponse(exchange, gson.toJson(manager.getTasks()), 200);
+        writeResponse(exchange, gson.toJson(manager.getSubtasks()), 200);
     }
 
     private void handleGetTaskById(HttpExchange exchange) throws IOException {
-        Optional<Integer> subtaskOptId = getId(exchange);
-
-        if (subtaskOptId.isEmpty()) {
-            writeResponse(exchange, "Некорректный идентификатор подзадачи", 400);
-            return;
+        try {
+            Subtask subtask = manager.getSubtask(getId(exchange));
+            sendText(exchange, gson.toJson(subtask));
+        } catch (NumberFormatException e) {
+            sendBadRequest(exchange, "Некорректный идентификатор подзадачи");
+        } catch (NotFoundException e) {
+            sendNotFound(exchange, e.getMessage());
         }
-        Optional<Subtask> subtaskOpt = manager.getSubtask(subtaskOptId.get());
-        if (subtaskOpt.isEmpty()) {
-            writeResponse(exchange, "Подзадачи с таким идентификатором не существует", 404);
-            return;
-        }
-        writeResponse(exchange, gson.toJson(subtaskOpt.get()), 200);
     }
 
     private void handlePostSubtask(HttpExchange exchange) throws IOException {
@@ -94,30 +92,23 @@ public class SubtasksHandler extends AbstractHandler {
                     response = "Подзадача обновлена";
                     manager.updateSubtask(subtask);
                 }
-                writeResponse(exchange, response, 201);
+                sendUpdated(exchange, response);
             } catch (TimeIntersectionException e) {
-                writeResponse(exchange, e.getMessage(), 406);
+                sendHasIntersections(exchange, e.getMessage());
             } catch (NotFoundException e) {
-                writeResponse(exchange, e.getMessage(), 404);
+                sendNotFound(exchange, e.getMessage());
             }
-        } catch (JsonSyntaxException e) {
-            writeResponse(exchange, "Ошибка синтаксиса JSON: " + e.getMessage(), 400);
         }
     }
 
     private void handleDeleteSubtask(HttpExchange exchange) throws IOException {
-        Optional<Integer> subtaskOptId = getId(exchange);
-
-        if (subtaskOptId.isEmpty()) {
-            writeResponse(exchange, "Некорректный идентификатор подзадачи", 400);
-            return;
-        }
-
         try {
-            manager.deleteSubtask(subtaskOptId.get());
-            writeResponse(exchange, "Подзадача удалена", 200);
+            manager.deleteSubtask(getId(exchange));
+            sendText(exchange, "Подзадача удалена");
+        } catch (NumberFormatException e) {
+            sendBadRequest(exchange, "Некорректный идентификатор подзадачи");
         } catch (NotFoundException e) {
-            writeResponse(exchange, e.getMessage(), 404);
+            sendNotFound(exchange, e.getMessage());
         }
     }
 }

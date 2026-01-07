@@ -6,7 +6,7 @@ import ru.yandex.javacourse.schedule.manager.TaskManager;
 
 import java.io.IOException;
 
-public class PrioritizedHandler extends AbstractHandler {
+public class PrioritizedHandler extends BaseHttpHandler {
     private enum Endpoint { GET_PRIORITIZED, UNKNOWN }
 
     public PrioritizedHandler(TaskManager manager) {

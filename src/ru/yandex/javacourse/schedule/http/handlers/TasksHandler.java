@@ -9,9 +9,8 @@ import ru.yandex.javacourse.schedule.tasks.Task;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Optional;
 
-public class TasksHandler extends AbstractHandler {
+public class TasksHandler extends BaseHttpHandler {
     private enum Endpoint { GET_TASKS, GET_TASK, POST_TASK, DELETE_TASK, UNKNOWN }
 
     public TasksHandler(TaskManager manager) {
@@ -45,27 +44,26 @@ public class TasksHandler extends AbstractHandler {
                 default -> writeResponse(exchange, "Такого эндпоинта не существует", 404);
             }
         } catch (JsonSyntaxException e) {
-            writeResponse(exchange, "Ошибка синтаксиса JSON: " + e.getMessage(), 400);
+            sendBadRequest(exchange, "Ошибка синтаксиса JSON: " + e.getMessage());
+        } catch (Exception e) {
+            sendServer(exchange);
         }
     }
 
     private void handleGetTasks(HttpExchange exchange) throws IOException {
-        writeResponse(exchange, gson.toJson(manager.getTasks()), 200);
+        sendText(exchange, gson.toJson(manager.getTasks()));
     }
 
     private void handleGetTaskById(HttpExchange exchange) throws IOException {
-            Optional<Integer> taskIdOpt = getId(exchange);
-
-            if (taskIdOpt.isEmpty()) {
-                writeResponse(exchange, "Некорректный идентификатор задачи", 400);
-                return;
+            try {
+                int taskId = getId(exchange);
+                Task task = manager.getTask(taskId);
+                sendText(exchange, gson.toJson(task));
+            } catch (NotFoundException e) {
+                sendNotFound(exchange, e.getMessage());
+            } catch (NumberFormatException e) {
+                sendBadRequest(exchange, "Некорректный идентификатор задачи");
             }
-            Optional<Task> taskOpt = manager.getTask(taskIdOpt.get());
-            if (taskOpt.isEmpty()) {
-                writeResponse(exchange, "Задачи с таким идентификатором не существует", 404);
-                return;
-            }
-            writeResponse(exchange, gson.toJson(taskOpt.get()), 200);
     }
 
     private void handlePostTask(HttpExchange exchange) throws IOException {
@@ -73,14 +71,14 @@ public class TasksHandler extends AbstractHandler {
             String body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
 
             if (body.isEmpty()) {
-                writeResponse(exchange, "Тело запроса пусто", 400);
+                sendBadRequest(exchange, "Тело запроса пусто");
                 return;
             }
 
             Task task = gson.fromJson(body, Task.class);
 
             if (task == null || task.getName() == null || task.getDescription() == null || task.getStatus() == null) {
-                writeResponse(exchange, "Некорректный JSON или отсутствуют обязательные поля", 400);
+                sendBadRequest(exchange, "Некорректный JSON или отсутствуют обязательные поля");
                 return;
             }
 
@@ -93,30 +91,24 @@ public class TasksHandler extends AbstractHandler {
                     response = "Задача обновлена";
                     manager.updateTask(task);
                 }
-                writeResponse(exchange, response, 201);
+                sendUpdated(exchange, response);
             } catch (TimeIntersectionException e) {
-                writeResponse(exchange, e.getMessage(), 406);
+                sendHasIntersections(exchange, e.getMessage());
             } catch (NotFoundException e) {
-                writeResponse(exchange, e.getMessage(), 404);
+                sendNotFound(exchange, e.getMessage());
             }
-        } catch (JsonSyntaxException e) {
-            writeResponse(exchange, "Ошибка синтаксиса JSON: " + e.getMessage(), 400);
         }
     }
 
     private void handleDeleteTask(HttpExchange exchange) throws IOException {
-        Optional<Integer> taskIdOpt = getId(exchange);
-
-        if (taskIdOpt.isEmpty()) {
-            writeResponse(exchange, "Некорректный идентификатор задачи", 400);
-            return;
-        }
-
         try {
-            manager.deleteTask(taskIdOpt.get());
-            writeResponse(exchange, "Задача удалена", 200);
+            int taskId = getId(exchange);
+            manager.deleteTask(taskId);
+            sendText(exchange, "Задача удалена");
         } catch (NotFoundException e) {
-            writeResponse(exchange, e.getMessage(), 404);
+            sendBadRequest(exchange, e.getMessage());
+        } catch (NumberFormatException e) {
+            sendBadRequest(exchange, "Некорректный идентификатор задачи");
         }
     }
 }

@@ -82,7 +82,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         manager.addNewTask(task1);
 
-        assertSame(task1, manager.getTask(task1.getId()).get(), "Должен вернуть задачу по id");
+        assertSame(task1, manager.getTask(task1.getId()), "Должен вернуть задачу по id");
     }
 
     @Test
@@ -91,7 +91,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         manager.addNewTask(task1);
 
-        assertEquals(Optional.empty(), manager.getTask(1000), "Должен вернуть empty");
+        assertThrows(NotFoundException.class, () -> manager.getTask(1000));
     }
 
     @Test
@@ -103,7 +103,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         manager.addNewTask(subtask1);
 
-        assertSame(subtask1, manager.getTask(subtask1.getId()).get(), "Должен вернуть подзадачу по id");
+        assertSame(subtask1, manager.getTask(subtask1.getId()), "Должен вернуть подзадачу по id");
     }
 
     @Test
@@ -115,7 +115,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         manager.addNewTask(subtask1);
 
-        assertEquals(Optional.empty(), manager.getTask(1000), "Должен вернуть empty");
+        assertThrows(NotFoundException.class, () -> manager.getTask(1000), "Должен вернуть empty");
     }
 
     @Test
@@ -124,7 +124,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         manager.addNewEpic(epic);
 
-        assertSame(epic, manager.getEpic(epic.getId()).get(), "Должен вернуть эпик по id");
+        assertSame(epic, manager.getEpic(epic.getId()), "Должен вернуть эпик по id");
     }
 
     @Test
@@ -133,7 +133,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         manager.addNewEpic(epic);
 
-        assertEquals(Optional.empty(), manager.getTask(1000), "Должен вернуть empty");
+        assertThrows(NotFoundException.class, () -> manager.getTask(1000));
     }
 
     @Test
@@ -142,7 +142,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         int id = manager.addNewTask(task1);
 
-        assertSame(task1, manager.getTask(id).get(), "Задача должна быть в менеджере");
+        assertSame(task1, manager.getTask(id), "Задача должна быть в менеджере");
     }
 
     @Test
@@ -175,7 +175,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtask1 = new Subtask(1, "Test 1", "Testing subtask 1", TaskStatus.NEW, epic.getId(), null, null);
         int id = manager.addNewSubtask(subtask1);
 
-        assertSame(subtask1, manager.getSubtask(id).get(), "Подзадача должна быть в менеджере");
+        assertSame(subtask1, manager.getSubtask(id), "Подзадача должна быть в менеджере");
     }
 
     @Test
@@ -213,7 +213,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic(3, "Test 1", "Testing epic for subtasks");
         int id = manager.addNewEpic(epic);
 
-        assertSame(epic, manager.getEpic(id).get(), "Эпик должен быть в менеджере");
+        assertSame(epic, manager.getEpic(id), "Эпик должен быть в менеджере");
     }
 
     @Test
@@ -232,11 +232,11 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Task taskNew = new Task(1, "Test New", "Testing task New", TaskStatus.NEW, null, null);
 
         manager.addNewTask(taskOld);
-        assertSame(taskOld, manager.getTask(taskOld.getId()).get(), "Задача должна добавиться");
+        assertSame(taskOld, manager.getTask(taskOld.getId()), "Задача должна добавиться");
 
         manager.updateTask(taskNew);
-        assertSame(taskNew, manager.getTask(taskOld.getId()).get(), "Задача должна обновиться");
-        assertNotSame(taskOld, manager.getTask(taskOld.getId()).get(), "Старой задачи не должно быть в менеджере");
+        assertSame(taskNew, manager.getTask(taskOld.getId()), "Задача должна обновиться");
+        assertNotSame(taskOld, manager.getTask(taskOld.getId()), "Старой задачи не должно быть в менеджере");
     }
 
     @Test
@@ -245,7 +245,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Task taskNew = new Task(2, "Test New", "Testing task New", TaskStatus.NEW, null, null);
 
         manager.addNewTask(taskOld);
-        assertSame(taskOld, manager.getTask(taskOld.getId()).get(), "Задача должна добавиться");
+        assertSame(taskOld, manager.getTask(taskOld.getId()), "Задача должна добавиться");
 
         assertThrows(NotFoundException.class, () -> manager.updateTask(taskNew));
     }
@@ -256,12 +256,12 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epicNew = new Epic(1, "Test New", "Testing epic New");
 
         manager.addNewEpic(epicOld);
-        assertSame(epicOld, manager.getEpic(epicOld.getId()).get(), "Эпик должен добавиться");
+        assertSame(epicOld, manager.getEpic(epicOld.getId()), "Эпик должен добавиться");
 
         manager.updateEpic(epicNew);
         assertEquals(epicOld.getName(), epicNew.getName(), "Имя эпика должно обновиться");
         assertEquals(epicOld.getDescription(), epicNew.getDescription(), "Описание эпика должно обновиться");
-        assertSame(epicOld, manager.getEpic(epicOld.getId()).get(), "Эпик должен остаться тем же объектом в менеджере");
+        assertSame(epicOld, manager.getEpic(epicOld.getId()), "Эпик должен остаться тем же объектом в менеджере");
     }
 
     @Test
@@ -270,7 +270,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epicNew = new Epic(2, "Test New", "Testing epic New");
 
         manager.addNewEpic(epicOld);
-        assertSame(epicOld, manager.getEpic(epicOld.getId()).get(), "Эпик должен добавиться");
+        assertSame(epicOld, manager.getEpic(epicOld.getId()), "Эпик должен добавиться");
 
         assertThrows(NotFoundException.class, () -> manager.updateEpic(epicNew));
     }
@@ -284,10 +284,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtaskNew = new Subtask(1, "Test New", "Testing subtask New", TaskStatus.NEW, 3, null, null);
 
         manager.addNewSubtask(subtaskOld);
-        assertSame(subtaskOld, manager.getSubtask(subtaskOld.getId()).get(), "Подзадача должна добавиться");
+        assertSame(subtaskOld, manager.getSubtask(subtaskOld.getId()), "Подзадача должна добавиться");
 
         manager.updateSubtask(subtaskNew);
-        assertSame(subtaskNew, manager.getSubtask(subtaskOld.getId()).get(), "Подзадача должна обновиться");
+        assertSame(subtaskNew, manager.getSubtask(subtaskOld.getId()), "Подзадача должна обновиться");
     }
 
     @Test
@@ -299,7 +299,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtaskNew = new Subtask(2, "Test New", "Testing subtask New", TaskStatus.NEW, 3, null, null);
 
         manager.addNewSubtask(subtaskOld);
-        assertSame(subtaskOld, manager.getSubtask(subtaskOld.getId()).get(), "Подзадача должна добавиться");
+        assertSame(subtaskOld, manager.getSubtask(subtaskOld.getId()), "Подзадача должна добавиться");
 
         assertThrows(NotFoundException.class, () -> manager.updateSubtask(subtaskNew));
     }
@@ -313,7 +313,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtaskNew = new Subtask(1, "Test New", "Testing subtask New", TaskStatus.NEW, 4, null, null);
 
         manager.addNewSubtask(subtaskOld);
-        assertSame(subtaskOld, manager.getSubtask(subtaskOld.getId()).get(), "Подзадача должна добавиться");
+        assertSame(subtaskOld, manager.getSubtask(subtaskOld.getId()), "Подзадача должна добавиться");
 
         assertThrows(NotFoundException.class, () -> manager.updateSubtask(subtaskNew));
     }
@@ -323,7 +323,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Task task = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW, null, null);
         int id = manager.addNewTask(task);
 
-        assertSame(task, manager.getTask(id).get(), "Задача должна добавиться в менеджер");
+        assertSame(task, manager.getTask(id), "Задача должна добавиться в менеджер");
 
         manager.deleteTask(id);
         assertEquals(0, manager.getTasks().size(), "Список задач должен быть пуст");
@@ -334,9 +334,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Task task = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW, null, null);
         int id = manager.addNewTask(task);
 
-        assertSame(task, manager.getTask(id).get(), "Задача должна добавиться в менеджер");
+        assertSame(task, manager.getTask(id), "Задача должна добавиться в менеджер");
 
-        manager.deleteTask(1000);
+        assertThrows(NotFoundException.class, () -> manager.deleteTask(1000));
         assertEquals(1, manager.getTasks().size(), "Список задач должен иметь одну задачу");
     }
 
@@ -350,7 +350,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         manager.addNewSubtask(subtask1);
         manager.addNewSubtask(subtask2);
 
-        assertEquals(epic, manager.getEpic(id).get(), "Эпик должен добавиться в менеджер");
+        assertEquals(epic, manager.getEpic(id), "Эпик должен добавиться в менеджер");
         assertEquals(2, manager.getEpicSubtasks(id).size(), "В списке подзадач эпика должно быть 2 подзадачи");
 
         manager.deleteEpic(id);
@@ -368,9 +368,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         manager.addNewSubtask(subtask1);
         manager.addNewSubtask(subtask2);
 
-        assertSame(epic, manager.getEpic(id).get(), "Эпик должен добавиться в менеджер");
+        assertSame(epic, manager.getEpic(id), "Эпик должен добавиться в менеджер");
 
-        manager.deleteEpic(1000);
+        assertThrows(NotFoundException.class, () -> manager.deleteEpic(1000));
         assertEquals(1, manager.getEpics().size(), "Список эпиков должен иметь один эпик");
         assertEquals(2, manager.getSubtasks().size(), "В списке подзадач должно быть две подзадачи");
     }
@@ -385,7 +385,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         manager.addNewSubtask(subtask1);
         int id = manager.addNewSubtask(subtask2);
 
-        assertSame(epic, manager.getEpic(epicId).get(), "Эпик должен добавиться в менеджер");
+        assertSame(epic, manager.getEpic(epicId), "Эпик должен добавиться в менеджер");
         assertEquals(2, manager.getEpicSubtasks(epicId).size(), "В списке подзадач эпика должно быть 2 подзадачи");
 
         manager.deleteSubtask(id);
@@ -403,10 +403,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         manager.addNewSubtask(subtask1);
         manager.addNewSubtask(subtask2);
 
-        assertSame(epic, manager.getEpic(epicId).get(), "Эпик должен добавиться в менеджер");
+        assertSame(epic, manager.getEpic(epicId), "Эпик должен добавиться в менеджер");
         assertEquals(2, manager.getEpicSubtasks(epicId).size(), "В списке подзадач эпика должно быть 2 подзадачи");
 
-        manager.deleteSubtask(1000);
+        assertThrows(NotFoundException.class, () -> manager.deleteSubtask(1000));
         assertEquals(1, manager.getEpics().size(), "Эпик должен остаться");
         assertEquals(2, manager.getSubtasks().size(), "В списке подзадач должно быть 2 подзадачи");
     }
