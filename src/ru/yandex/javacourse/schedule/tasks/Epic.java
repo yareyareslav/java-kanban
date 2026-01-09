@@ -9,23 +9,28 @@ import java.util.*;
 public class Epic extends Task {
 	protected ArrayList<Integer> subtaskIds = new ArrayList<>();
 	protected LocalDateTime endTime;
-	public static final TaskType type = TaskType.EPIC;
 
 	public Epic(int id, String name, String description) {
 		super(id, name, description, NEW, null, null);
+		super.type = TaskType.EPIC;
 		this.startTime = null;
 		this.duration = null;
 	}
 
 	public Epic(String name, String description) {
 		super(name, description, NEW, null, null);
+		super.type = TaskType.EPIC;
 		this.startTime = null;
 		this.duration = null;
 	}
 
 	public void addSubtaskId(int id) {
-		if (this.getId() == id) return;
-		if (subtaskIds.contains(id)) return;
+		if (this.getId() == id) {
+			return;
+		}
+		if (subtaskIds.contains(id)) {
+			return;
+		}
 		subtaskIds.add(id);
 	}
 

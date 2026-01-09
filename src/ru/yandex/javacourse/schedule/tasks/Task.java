@@ -10,7 +10,7 @@ public class Task {
 	protected String name;
 	protected TaskStatus status;
 	protected String description;
-	private final TaskType type = TaskType.TASK;
+	protected TaskType type;
 	protected Duration duration;
 	protected LocalDateTime startTime;
 
@@ -20,14 +20,13 @@ public class Task {
 		this.status = status;
 		this.duration = duration;
 		this.startTime = startTime;
+		type = TaskType.TASK;
 	}
 
 	public Task(int id, String name, String description, TaskStatus status, Duration duration, LocalDateTime startTime) {
 		this(name, description, status, duration, startTime);
 		this.id = id;
 	}
-
-
 
 	public int getId() {
 		return id;

@@ -1,6 +1,5 @@
 package ru.yandex.javacourse.schedule.manager;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.javacourse.schedule.tasks.*;
 
@@ -68,9 +67,9 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         assertEquals(1, manager.getEpics().size(), "Должен загрузиться один эпик");
         assertEquals(1, manager.getSubtasks().size(), "Должна загрузиться одна подзадача");
 
-        Task loadedTask = manager.getTask(7).get();
-        Epic loadedEpic = manager.getEpic(8).get();
-        Subtask loadedSubtask = manager.getSubtask(9).get();
+        Task loadedTask = manager.getTask(7);
+        Epic loadedEpic = manager.getEpic(8);
+        Subtask loadedSubtask = manager.getSubtask(9);
 
         assertEquals("Persisted task", loadedTask.getName(), "Имя задачи должно совпадать");
         assertEquals("Persisted epic", loadedEpic.getName(), "Имя эпика должно совпадать");
@@ -126,8 +125,8 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         assertEquals(0, newManager.getTasks().size(), "Задач быть не должно");
         assertEquals(1, newManager.getEpics().size(), "Должен быть один эпик");
         assertEquals(1, newManager.getSubtasks().size(), "Должна быть одна подзадача");
-        assertEquals(epic, newManager.getEpic(3).get(), "Должен быть один эпик");
-        assertEquals(subtask, newManager.getSubtask(2).get(), "Должна быть одна подзадача");
+        assertEquals(epic, newManager.getEpic(3), "Должен быть один эпик");
+        assertEquals(subtask, newManager.getSubtask(2), "Должна быть одна подзадача");
 
     }
 
@@ -159,7 +158,7 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
         TaskManager newManager = Managers.getFileBacked(file);
 
-        assertEquals(2, newManager.getEpic(epic.getId()).get().getSubtaskIds().size(), "В эпике должно быть 2 подзадачи");
+        assertEquals(2, newManager.getEpic(epic.getId()).getSubtaskIds().size(), "В эпике должно быть 2 подзадачи");
     }
 
     private void getEndTimeTemplate() {
@@ -185,13 +184,13 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         getEndTimeTemplate();
 
         TaskManager newManager = Managers.getFileBacked(file);
-        Task task = newManager.getTask(1).get();
-        Epic epic = newManager.getEpic(2).get();
-        Subtask subtask = newManager.getSubtask(3).get();
+        Task task = newManager.getTask(1);
+        Epic epic = newManager.getEpic(2);
+        Subtask subtask = newManager.getSubtask(3);
 
-        assertEquals(manager.getTask(1).get(), task, "Задача должно быть равен предыдущей версии");
-        assertEquals(manager.getEpic(2).get(), epic, "Эпик должен быть равен предыдущей версии");
-        assertEquals(manager.getSubtask(3).get(), subtask, "Подзадача должно быть равен предыдущей версии");
+        assertEquals(manager.getTask(1), task, "Задача должно быть равен предыдущей версии");
+        assertEquals(manager.getEpic(2), epic, "Эпик должен быть равен предыдущей версии");
+        assertEquals(manager.getSubtask(3), subtask, "Подзадача должно быть равен предыдущей версии");
     }
 
     @Test
@@ -199,13 +198,13 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         getEndTimeTemplate();
 
         TaskManager newManager = Managers.getFileBacked(file);
-        Task task = newManager.getTask(1).get();
-        Epic epic = newManager.getEpic(2).get();
-        Subtask subtask = newManager.getSubtask(3).get();
+        Task task = newManager.getTask(1);
+        Epic epic = newManager.getEpic(2);
+        Subtask subtask = newManager.getSubtask(3);
 
-        assertEquals(manager.getTask(1).get().getEndTime().get(), task.getEndTime().get(), "Задача должна заканчиваться в то же время");
-        assertEquals(manager.getEpic(2).get().getEndTime().get(), epic.getEndTime().get(), "Эпик должен заканчиваться в то же время");
-        assertEquals(manager.getSubtask(3).get().getEndTime().get(), subtask.getEndTime().get(), "Подзадача должна заканчиваться в то же время");
+        assertEquals(manager.getTask(1).getEndTime().get(), task.getEndTime().get(), "Задача должна заканчиваться в то же время");
+        assertEquals(manager.getEpic(2).getEndTime().get(), epic.getEndTime().get(), "Эпик должен заканчиваться в то же время");
+        assertEquals(manager.getSubtask(3).getEndTime().get(), subtask.getEndTime().get(), "Подзадача должна заканчиваться в то же время");
     }
 
 
