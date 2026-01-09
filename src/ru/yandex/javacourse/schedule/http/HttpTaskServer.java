@@ -1,6 +1,5 @@
 package ru.yandex.javacourse.schedule.http;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpServer;
 import ru.yandex.javacourse.schedule.http.handlers.*;
 import ru.yandex.javacourse.schedule.manager.Managers;
