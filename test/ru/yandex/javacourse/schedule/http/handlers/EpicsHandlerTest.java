@@ -3,15 +3,10 @@ package ru.yandex.javacourse.schedule.http.handlers;
 import org.junit.jupiter.api.Test;
 import ru.yandex.javacourse.schedule.http.tokens.EpicListTypeToken;
 import ru.yandex.javacourse.schedule.tasks.Epic;
-import ru.yandex.javacourse.schedule.tasks.Subtask;
-import ru.yandex.javacourse.schedule.tasks.Task;
-import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 
 import java.io.IOException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
