@@ -167,15 +167,22 @@ public class SubtasksHandlerTest extends BaseHttpHandlerTest {
 
     @Test
     public void deleteSubtask_shouldDeleteSubtask() throws IOException, InterruptedException {
-        Subtask subtask = new Subtask(1, "Test", "Subtask task",
-                TaskStatus.NEW, 2, Duration.ofMinutes(5), LocalDateTime.now());
-        Epic epic = new Epic(2, "Epic", "Epic description");
+        Subtask subtask = new Subtask("Test", "Subtask task",
+                TaskStatus.NEW, 1, Duration.ofMinutes(5), LocalDateTime.now());
+        Epic epic = new Epic( "Epic", "Epic description");
         manager.addNewEpic(epic);
         manager.addNewSubtask(subtask);
 
-        HttpRequest request = buildDeleteRequest("/1");
+        HttpRequest request = buildDeleteRequest("/2");
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(200, response.statusCode());
+
+        Subtask subtaskFromServer = gson.fromJson(response.body(), Subtask.class);
+        assertEquals(subtask.getId(), subtaskFromServer.getId(), "Id должны быть равны");
+        assertEquals(subtask.getName(), subtaskFromServer.getName(), "Имена должны быть одинаковыми");
+        assertEquals(subtask.getDescription(), subtaskFromServer.getDescription(), "Описания должны быть одинаковыми");
+        assertEquals(subtask.getDuration(), subtaskFromServer.getDuration(), "Продолжительности должны быть одинаковыми");
+        assertEquals(subtask.getStartTime(), subtaskFromServer.getStartTime(), "Сроки старта должны быть одинаковыми");
     }
 }

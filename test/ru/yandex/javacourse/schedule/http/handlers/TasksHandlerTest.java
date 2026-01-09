@@ -157,5 +157,12 @@ public class TasksHandlerTest extends BaseHttpHandlerTest {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(200, response.statusCode());
+
+        Task taskFromServer = gson.fromJson(response.body(), Task.class);
+        assertEquals(task.getId(), taskFromServer.getId(), "Id должны быть равны");
+        assertEquals(task.getName(), taskFromServer.getName(), "Имена должны быть одинаковыми");
+        assertEquals(task.getDescription(), taskFromServer.getDescription(), "Описания должны быть одинаковыми");
+        assertEquals(task.getDuration(), taskFromServer.getDuration(), "Продолжительности должны быть одинаковыми");
+        assertEquals(task.getStartTime(), taskFromServer.getStartTime(), "Сроки старта должны быть одинаковыми");
     }
 }

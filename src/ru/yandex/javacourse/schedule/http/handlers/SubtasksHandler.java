@@ -103,8 +103,10 @@ public class SubtasksHandler extends BaseHttpHandler {
 
     private void handleDeleteSubtask(HttpExchange exchange) throws IOException {
         try {
-            manager.deleteSubtask(getId(exchange));
-            sendText(exchange, "Подзадача удалена");
+            int subtaskId = getId(exchange);
+            Subtask subtask = manager.getSubtask(subtaskId);
+            manager.deleteSubtask(subtaskId);
+            sendText(exchange, gson.toJson(subtask));
         } catch (NumberFormatException e) {
             sendBadRequest(exchange, "Некорректный идентификатор подзадачи");
         } catch (NotFoundException e) {

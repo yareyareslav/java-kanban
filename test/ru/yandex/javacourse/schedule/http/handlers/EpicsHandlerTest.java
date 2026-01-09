@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.javacourse.schedule.http.tokens.EpicListTypeToken;
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
+import ru.yandex.javacourse.schedule.tasks.Task;
 import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 
 import java.io.IOException;
@@ -107,5 +108,10 @@ public class EpicsHandlerTest extends BaseHttpHandlerTest {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(200, response.statusCode());
+
+        Epic epicFromServer = gson.fromJson(response.body(), Epic.class);
+        assertEquals(epic.getId(), epicFromServer.getId(), "Id должны быть равны");
+        assertEquals(epic.getName(), epicFromServer.getName(), "Имена должны быть одинаковыми");
+        assertEquals(epic.getDescription(), epicFromServer.getDescription(), "Описания должны быть одинаковыми");
     }
 }

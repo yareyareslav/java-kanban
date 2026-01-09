@@ -115,8 +115,10 @@ public class EpicsHandler extends BaseHttpHandler {
 
     private void handleDeleteEpic(HttpExchange exchange) throws IOException {
         try {
+            int epicId = getId(exchange);
+            Epic epic = manager.getEpic(epicId);
             manager.deleteEpic(getId(exchange));
-            sendText(exchange, "Задача удалена");
+            sendText(exchange, gson.toJson(epic));
         } catch (NumberFormatException e) {
             sendBadRequest(exchange, "Некорректный идентификатора эпика");
         } catch (NotFoundException e) {

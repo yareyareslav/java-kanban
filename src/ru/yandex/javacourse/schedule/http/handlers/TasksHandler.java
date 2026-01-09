@@ -103,8 +103,9 @@ public class TasksHandler extends BaseHttpHandler {
     private void handleDeleteTask(HttpExchange exchange) throws IOException {
         try {
             int taskId = getId(exchange);
+            Task task = manager.getTask(taskId);
             manager.deleteTask(taskId);
-            sendText(exchange, "Задача удалена");
+            sendText(exchange, gson.toJson(task));
         } catch (NotFoundException e) {
             sendBadRequest(exchange, e.getMessage());
         } catch (NumberFormatException e) {
